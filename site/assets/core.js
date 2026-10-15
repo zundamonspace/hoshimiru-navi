@@ -392,7 +392,7 @@ const SITE={name:"ほしみるナビ",url:"https://hoshimiru-navi.com",
   x:"https://x.com/zundamon_space",
   amazonTag:"",      // AmazonアソシエイトのトラッキングID（例: xxxx-22）。空なら商品ボタンを出さない
   rakutenId:"",      // 楽天アフィリエイトID。空なら使わない
-  adsenseClient:""   // AdSenseのca-pub-…。空なら広告枠を出さない
+  adsenseClient:"ca-pub-3529852718871848"   // AdSenseのca-pub-…。空なら広告を出さない
 };
 const PREF_SLUG=["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima","ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa","niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu","shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara","wakayama","tottori","shimane","okayama","hiroshima","yamaguchi","tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki","kumamoto","oita","miyazaki","kagoshima","okinawa"];
 PLACES.forEach((p,i)=>{p.slug=PREF_SLUG[i];p.full=p.label.split("・")[0]});
