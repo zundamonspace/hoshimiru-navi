@@ -464,7 +464,7 @@ function figHTML(C){const F=FIG[C.n];
 function eventsFrom(today){const x=new Date(today+9*3600e3),y=x.getUTCFullYear();
   return EVENTS.flatMap(e=>[y,y+1].map(yy=>({...e,y:yy,t:Date.UTC(yy,e.d[0]-1,e.d[1]),slug:`${e.k}-${yy}`})))}
 function upcoming(){const[y,m,d]=jstNow(),today=Date.UTC(y,m,d);
-  return eventsFrom(today).filter(e=>e.t>=today).sort((a,b)=>a.t-b.t).slice(0,EVENTS.length).map(e=>({...e,dd:Math.round((e.t-today)/DAY)}))}
+  return eventsFrom(today).filter(e=>e.t>=today).sort((a,b)=>a.t-b.t).slice(0,5).map(e=>({...e,dd:Math.round((e.t-today)/DAY)}))}
 // その夜の流星群の見頃：空が暗く、放射点が高く、月明かりが弱い時間
 function meteorWindowAt(e,pi,dayIdx,weather){const P=PLACES[pi],slots=nightSlots(pi,dayIdx,weather);let best=null,cur=null;
   const sc=slots.map((x,i)=>{const r=horiz(x.t,P.lat,P.lng,e.ra*15*R,e.de*R);const cf=x.cloud==null?0:x.cloud;return{i,v:x.sa<-18&&r.alt>20?Math.sin(r.alt*R)*(1-.6*x.moonLight)*(1-cf/100):0}});

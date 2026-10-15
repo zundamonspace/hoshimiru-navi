@@ -182,7 +182,7 @@ ${targetFirst ? "" : target}
       <span class="eb">YOUTUBE・宇宙と謎のずんだ研究所</span>
       <h3>宇宙・サイエンス・世界の謎の解説動画</h3>
       <p>宇宙・サイエンス・世界の謎をわかりやすく解説しています。星や宇宙が好きな人はチャンネル登録してね。</p>
-      <div class="btns"><a class="sub" href="${SITE.youtube}?sub_confirmation=1" target="_blank" rel="noopener">チャンネル登録</a><a class="watch" href="${SITE.youtube}/videos" target="_blank" rel="noopener">動画を見る</a></div>
+      <div class="btns"><a class="ytsub" href="${SITE.youtube}?sub_confirmation=1" target="_blank" rel="noopener">チャンネル登録</a><a class="ytwatch" href="${SITE.youtube}/videos" target="_blank" rel="noopener">動画を見る</a></div>
     </div>
   </section>
 
