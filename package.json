@@ -1,0 +1,9 @@
+{
+  "name": "hoshimiru-navi",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "weather": "node scripts/fetch-weather.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

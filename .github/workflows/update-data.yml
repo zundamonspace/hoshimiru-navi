@@ -1,0 +1,32 @@
+name: 予報データの更新
+
+on:
+  schedule:
+    - cron: "17 */3 * * *"   # 3時間ごと（UTC）
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: update-data
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: 雲の予報を取得
+        run: node scripts/fetch-weather.mjs
+      - name: YouTubeの最新動画を取得
+        run: node scripts/fetch-youtube.mjs || true
+      - name: 変更があればコミット
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add site/data
+          git diff --cached --quiet || (git commit -m "予報データを更新" && git push)
