@@ -325,8 +325,7 @@ allEv.forEach(e => {
     title: `${e.n} ${e.y}の見頃はいつ？時間・方角・月明かり｜${SITE.name}`,
     desc: `${e.n}の極大は${date}。${e.rate}。都道府県ごとの見頃の時間、流れ星が飛んでくる方向、月明かりの条件をまとめています。`,
     url: `/event/${e.slug}/`,
-    jsonld: [crumbsLD([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`, null]]),
-      { "@context": "https://schema.org", "@type": "Event", name: `${e.n} ${e.y}`, startDate: `${e.y}-${String(e.d[0]).padStart(2, "0")}-${String(e.d[1]).padStart(2, "0")}T20:00+09:00`, endDate: `${e.y}-${String(e.d[0]).padStart(2, "0")}-${String(e.d[1]).padStart(2, "0")}T23:59+09:00`, eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode", eventStatus: "https://schema.org/EventScheduled", location: { "@type": "Place", name: "日本各地の夜空", address: { "@type": "PostalAddress", addressCountry: "JP" } }, description: e.tip, isAccessibleForFree: true }]
+    jsonld: [crumbsLD([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`, null]])]
   }) + topbar() + crumbs([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`]]) + `
   <section class="intro top-intro"><h1>${e.n} ${e.y}の見頃</h1>
     <dl class="evfacts"><dt>極大</dt><dd>${date}の夜</dd><dt>流れる数</dt><dd>${e.rate}</dd><dt>放射点</dt><dd><a href="/seiza/${C ? C.slug : ""}/">${e.c}</a>の方向</dd><dt>月明かり</dt><dd>${f < .3 ? "少なめで好条件" : f < .65 ? "やや邪魔" : "強め"}（月の輝き${Math.round(f * 100)}%）</dd></dl>
