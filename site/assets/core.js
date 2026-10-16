@@ -390,8 +390,9 @@ function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return
 const SITE={name:"ほしみるナビ",url:"https://hoshimiru-navi.com",
   youtube:"https://www.youtube.com/@%E5%AE%87%E5%AE%99%E3%81%A8%E8%AC%8E%E3%81%AE%E3%81%9A%E3%82%93%E3%81%A0%E7%A0%94%E7%A9%B6%E6%89%80",
   x:"https://x.com/zundamon_space",
-  amazonTag:"",      // AmazonアソシエイトのトラッキングID（例: xxxx-22）。空なら商品ボタンを出さない
-  rakutenId:"",      // 楽天アフィリエイトID。空なら使わない
+  // もしもアフィリエイトの提携ID。空(null)なら商品リンクを出さない
+  moshimoRakuten:{a_id:5851169,p_id:54,pc_id:54,pl_id:616},
+  moshimoAmazon:null,   // Amazonの承認後に {a_id:…,p_id:170,pc_id:185,pl_id:…} を入れる
   adsenseClient:"ca-pub-3529852718871848"   // AdSenseのca-pub-…。空なら広告を出さない
 };
 const PREF_SLUG=["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima","ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa","niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu","shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara","wakayama","tottori","shimane","okayama","hiroshima","yamaguchi","tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki","kumamoto","oita","miyazaki","kagoshima","okinawa"];

@@ -106,15 +106,29 @@ function answerHTML(pi, qTag = "div") {
   </section>`;
 }
 
+// もしもアフィリエイト経由の商品リンク（Amazonが承認されたらAmazonを優先）
+function shopLink(q) {
+  const m = SITE.moshimoAmazon, r = SITE.moshimoRakuten;
+  const wrap = (id, url) => `https://af.moshimo.com/af/c/click?a_id=${id.a_id}&p_id=${id.p_id}&pc_id=${id.pc_id}&pl_id=${id.pl_id}&url=${encodeURIComponent(url)}`;
+  if (m) return { href: wrap(m, `https://www.amazon.co.jp/s?k=${encodeURIComponent(q)}`), shop: "Amazon" };
+  if (r) return { href: wrap(r, `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(q)}/`), shop: "楽天" };
+  return null;
+}
 function kitHTML() {
-  const items = [
-    ["レジャーシートか寝袋", "寝転んで空全体を見るのが一番", "レジャーシート 厚手"],
-    ["赤いライト", "白い光だと目が暗さに慣れ直すのに15分以上かかる", "赤色ライト 天体観測"],
-    ["カイロ・ブランケット", "夜は思った以上に冷える。2時間じっとしていると体が冷え切る", "ブランケット アウトドア"]
+  const groups = [
+    ["流星群に出かける前に", [
+      ["レジャーシートか寝袋", "寝転んで空全体を見るのが一番", "レジャーシート 厚手 大判"],
+      ["赤いライト", "白い光だと、目が暗さに慣れ直すのに15分以上かかる", "赤色ライト 天体観測"],
+      ["カイロ・ブランケット", "夜は思った以上に冷える。2時間じっとしていると体が冷え切る", "アウトドア ブランケット"]]],
+    ["星座をもっと楽しむなら", [
+      ["星座早見盤", "空と見比べながら星座を探せる。1,000円前後から", "星座早見盤"],
+      ["双眼鏡（7×50か8×42）", "すばるや天の川の星の粒が、肉眼とは別世界に見える", "双眼鏡 7x50 天体観測"]]]
   ];
-  const link = q => SITE.amazonTag ? `https://www.amazon.co.jp/s?k=${encodeURIComponent(q)}&tag=${SITE.amazonTag}` : null;
-  return `<div class="kit"><span class="lbl">${SITE.amazonTag ? "PR・" : ""}流星群に出かける前に</span><strong>あると快適な持ち物</strong>
-        <ul>${items.map(([a, b, q]) => `<li>${link(q) ? `<a href="${link(q)}" target="_blank" rel="sponsored noopener">${a}</a>` : a}：${b}</li>`).join("")}</ul></div>`;
+  const any = !!shopLink("x");
+  const li = ([a, b, q]) => { const L = shopLink(q); return `<li>${L ? `<a href="${L.href}" target="_blank" rel="sponsored nofollow noopener">${a}</a>` : a}：${b}</li>`; };
+  return `<div class="kit">${any ? '<span class="lbl">PR（アフィリエイト広告を含みます）</span>' : ""}
+        ${groups.map(([h, items]) => `<strong>${h}</strong><ul>${items.map(li).join("")}</ul>`).join("\n        ")}
+        ${any ? `<span class="lbl">リンク先は${shopLink("x").shop}の検索結果です</span>` : ""}</div>`;
 }
 
 function targetPanel(staticCard = "") {
