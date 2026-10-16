@@ -25,6 +25,10 @@ for (const e of entries) {
 }
 pick = pick || entries[0];
 if (!pick) { console.error("no videos"); process.exit(0); }
+const prev = (() => { try { return JSON.parse(fs.readFileSync(OUT, "utf8")); } catch { return null; } })();
+console.log(`feed: ${entries.slice(0, 5).map(e => e.id + " " + e.title).join(" | ")}`);
+if (prev && prev.id === pick.id && prev.title === pick.title) { console.log(`youtube: 変更なし (${pick.title})`); process.exit(0); }
 fs.mkdirSync(path.dirname(OUT), { recursive: true });
-fs.writeFileSync(OUT, JSON.stringify({ ...pick, channelId: cid, updated: new Date().toISOString() }));
-console.log(`youtube: ${pick.title}`);
+// 動画が変わったときだけ書き換える（毎回書き換えるとサイトの作り直しが無駄に増えるため）
+fs.writeFileSync(OUT, JSON.stringify({ id: pick.id, title: pick.title, published: pick.published, channelId: cid }));
+console.log(`youtube: 更新 → ${pick.title}`);
