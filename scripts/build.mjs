@@ -89,7 +89,7 @@ function footer() {
 
 function tail(init) {
   return `</div>
-<script>window.HM_INIT=${JSON.stringify(init || {})};</script>
+<script>window.HM_INIT=${JSON.stringify(init || {})};window.HM_SHOP=${JSON.stringify(SHOP_QUICK)};</script>
 <script src="/assets/core.js?v=${ASSET_V}"></script>
 <script src="/assets/app.js?v=${ASSET_V}"></script>
 </body>
@@ -114,6 +114,9 @@ function shopLink(q) {
   if (r) return { href: wrap(r, `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(q)}/`), shop: "楽天" };
   return null;
 }
+// 流星群の前日・当日の案内に出す「持ち物チェック」
+const SHOP_QUICK = [["レジャーシート", "レジャーシート 厚手 大判"], ["赤いライト", "赤色ライト 天体観測"], ["カイロ・ブランケット", "アウトドア ブランケット"]]
+  .map(([n, q]) => { const L = shopLink(q); return L ? { n, href: L.href, shop: L.shop } : null; }).filter(Boolean);
 function kitHTML() {
   const groups = [
     ["流星群に出かける前に", [
@@ -125,7 +128,7 @@ function kitHTML() {
       ["双眼鏡（7×50か8×42）", "すばるや天の川の星の粒が、肉眼とは別世界に見える", "双眼鏡 7x50 天体観測"]]]
   ];
   const any = !!shopLink("x");
-  const li = ([a, b, q]) => { const L = shopLink(q); return `<li>${L ? `<a href="${L.href}" target="_blank" rel="sponsored nofollow noopener">${a}</a>` : a}：${b}</li>`; };
+  const li = ([a, b, q]) => { const L = shopLink(q); return `<li><div><b>${a}</b><span>${b}</span></div>${L ? `<a class="shopbtn" href="${L.href}" target="_blank" rel="sponsored nofollow noopener">${L.shop}で見る</a>` : ""}</li>`; };
   return `<div class="kit">${any ? '<span class="lbl">PR（アフィリエイト広告を含みます）</span>' : ""}
         ${groups.map(([h, items]) => `<strong>${h}</strong><ul>${items.map(li).join("")}</ul>`).join("\n        ")}
         ${any ? `<span class="lbl">リンク先は${shopLink("x").shop}の検索結果です</span>` : ""}</div>`;

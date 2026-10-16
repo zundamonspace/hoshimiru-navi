@@ -79,7 +79,8 @@ function renderAlert(e){const box=$("alert");if(!e||e.dd>7){box.hidden=true;retu
     const win=best?`${nx(slots[best.a].t)}${fmt(slots[best.a].t)}〜${nx(slots[best.b].t+1800e3)}${fmt(slots[best.b].t+1800e3)}`:null;
     box.className="alert";box.innerHTML=`<span class="eb">${e.dd===0?"今夜":"明日の夜"}・${date}</span><div class="t">${e.dd===0?"今夜は":"明日の夜は"}<em>${e.n}</em></div>
       <div class="d">${PLACES[st.place].p}の見頃は${win?`<strong>${win}</strong>`:"雲が多く厳しそう"}。${e.rate}。月明かりは${f<.3?"少なめで好条件":f<.65?"やや邪魔":"強め"}。${e.tip}</div>
-      <button type="button" id="alertgo">流れ星が飛んでくる方向を星図で見る</button>`;
+      <button type="button" id="alertgo">流れ星が飛んでくる方向を星図で見る</button>
+      ${(window.HM_SHOP||[]).length?`<div class="alertshop"><span class="lbl">持ち物チェック<small>PR</small></span>${HM_SHOP.map(x=>`<a href="${x.href}" target="_blank" rel="sponsored nofollow noopener">${esc(x.n)}</a>`).join("")}<small class="via">（${esc(HM_SHOP[0].shop)}で見る）</small></div>`:""}`;
     $("alertgo").onclick=()=>{st.day=e.dd;st.slot=best?best.peak:null;setTarget(e.c);render();document.getElementById("dome").scrollIntoView({behavior:"smooth",block:"center"})};
   }else{box.className="strip";box.innerHTML=`<span class="cd">あと${e.dd}日</span><span>${date}の夜は<strong>${e.n}</strong>（${e.rate}）</span><button type="button" id="alertgo">準備しておく</button>`;
     $("alertgo").onclick=()=>{setTarget(e.c);document.getElementById("tcard").scrollIntoView({behavior:"smooth",block:"start"})}}
