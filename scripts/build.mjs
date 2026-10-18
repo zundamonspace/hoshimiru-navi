@@ -81,7 +81,7 @@ function footer() {
     `<div><b>${s}</b><p>${CONS.filter(C => !C.mw && C.season === s && C.lv <= 2).map(C => `<a href="/seiza/${C.slug}/">${C.short}</a>`).join("")}</p></div>`).join("");
   return `  <footer class="foot">
     <section class="links"><h2>都道府県の星空</h2><div class="linkgrid">${regions}</div></section>
-    <section class="links"><h2>主な星座</h2><div class="linkgrid">${seasons}</div><p><a href="/seiza/">88星座の一覧を見る →</a>　<a href="/event/">流星群カレンダー →</a></p></section>
+    <section class="links"><h2>主な星座</h2><div class="linkgrid">${seasons}</div><p><a href="/seiza/">88星座の一覧を見る →</a>　<a href="/event/">流星群カレンダー →</a>　<a href="/gift/">宇宙好きの子へのプレゼント →</a></p></section>
     <nav class="footnav"><a href="/about/">運営者情報</a><a href="/privacy/">プライバシーポリシー</a><a href="/contact/">お問い合わせ</a><a href="${SITE.youtube}" target="_blank" rel="noopener">YouTube</a><a href="${SITE.x}" target="_blank" rel="noopener">X</a></nav>
     <p class="fine">※当サイトはアフィリエイト広告を利用しています。<br>雲の予報：<a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>（CC BY 4.0）のデータをもとに加工。日の入り・薄明・月・星座の位置は当サイトで計算しています。予報は外れることがあります。<br>© ${Y} ${SITE.name}</p>
   </footer>`;
@@ -356,6 +356,41 @@ allEv.forEach(e => {
   </section>
 ` + footer() + tail({ target: e.c, day: dd >= 0 && dd <= 3 ? dd : undefined }), { priority: 0.8, changefreq: "daily" });
 });
+
+// 宇宙好きの子へのプレゼント（年齢別）
+{
+  const G = [
+    ["3〜5歳", "まずは「きれい」「ふしぎ」から。毎日目に入るものがおすすめです。", [
+      ["おやすみ星空ライト", "天井や壁に星を映すライト。寝る前の部屋が小さなプラネタリウムに。タイマー付きだと寝落ちしても安心です。", "星空 プロジェクター ライト 子供"],
+      ["宇宙の絵本", "月や星を主人公にした絵本は、寝る前の読み聞かせにぴったり。「宇宙 絵本」で探すと、写真が中心のものからお話のものまであります。", "宇宙 絵本 幼児"],
+      ["光る星のシール", "天井に貼ると、電気を消したあとにぼんやり光ります。自分で星座の形に貼ってみるのも楽しい遊びです。", "蓄光 星 シール 天井"]]],
+    ["小学校低学年", "「なんで？」が一番多い時期。調べる道具があると、興味が長続きします。", [
+      ["宇宙の図鑑", "「講談社の動く図鑑MOVE 宇宙」や「小学館の図鑑NEO 宇宙」など。DVD付きの巻なら、映像から入れるので本が苦手な子にも。", "図鑑 宇宙 DVD付き"],
+      ["家庭用プラネタリウム", "部屋の天井いっぱいに星空を映せます。おもちゃ売り場のものより、映る星の数や明るさで選ぶのがおすすめ。", "家庭用 プラネタリウム"],
+      ["月球儀", "地球儀の月版。クレーターや「海」の名前が書いてあり、実際の月と見比べると発見があります。", "月球儀"]]],
+    ["小学校高学年〜", "自分で見て、自分で調べる年ごろ。本物を見る体験が一番の刺激になります。", [
+      ["はじめての天体望遠鏡", "月のクレーターや土星の輪を見たいなら、口径70mm前後の屈折式が入門の定番です。組み立てが簡単なものを選ぶと、使わなくなりにくいです。", "天体望遠鏡 初心者 屈折式"],
+      ["双眼鏡（7×50か8×42）", "望遠鏡より手軽で、すばるや月をすぐに見られます。家族のレジャーにも使えます。", "双眼鏡 7x50"],
+      ["星座早見盤", "日付と時刻を合わせると、今見える星座が分かる道具。1,000円前後からあり、スマホより目が暗さに慣れやすいのも利点です。", "星座早見盤"],
+      ["科学実験キット", "宇宙に限らず「試してみる」楽しさを知ると、理科全体が好きになります。", "科学 実験キット 小学生"]]]
+  ];
+  const any = !!shopLink("x");
+  const body = G.map(([age, lead, items]) => `<h2>${age}</h2><p>${lead}</p><ul class="giftlist">${items.map(([n, d, q]) => { const L = shopLink(q); return `<li><div><b>${n}</b><p>${d}</p></div>${L ? `<a class="shopbtn" href="${L.href}" target="_blank" rel="sponsored nofollow noopener">${L.shop}で見る</a>` : ""}</li>`; }).join("")}</ul>`).join("");
+  write("/gift/", head({
+    title: `宇宙好きの子へのプレゼント｜年齢別のおすすめ - ${SITE.name}`,
+    desc: "宇宙や星が好きな子どもへのプレゼントを年齢別に紹介。おやすみ星空ライト、宇宙の図鑑、家庭用プラネタリウム、はじめての天体望遠鏡まで、選び方のポイントをまとめました。",
+    url: "/gift/", jsonld: [crumbsLD([["宇宙好きの子へのプレゼント", null]])]
+  }) + topbar() + crumbs([["宇宙好きの子へのプレゼント"]]) + `<section class="intro gift">
+    ${any ? '<p class="prnote">PR：このページにはアフィリエイト広告（商品へのリンク）が含まれます。</p>' : ""}
+    <h1>宇宙好きの子へのプレゼント</h1>
+    <p>「星ってなんで光るの？」「宇宙ってどこまであるの？」。そんな質問が増えてきたら、興味を伸ばすチャンスです。年齢ごとに、宇宙や星への興味を育てやすいプレゼントをまとめました。</p>
+    ${body}
+    <h2>どれを選ぶか迷ったら</h2>
+    <p>高価な道具より、「毎日なんとなく目に入るもの」のほうが興味は続きやすいものです。そして一番効くのは、プレゼントを渡したあと、一緒に本物の空を見上げる時間です。<a href="/">今夜、星が見える時間</a>や<a href="/event/">流星群の日</a>を調べて、親子で外に出てみてください。</p>
+    ${any ? `<p class="kv">リンク先は${shopLink("x").shop}の検索結果です。商品の値段や在庫はリンク先でご確認ください。</p>` : ""}
+  </section>
+` + footer() + tail({}), { priority: 0.8, changefreq: "weekly" });
+}
 
 // 運営者情報・プライバシー・お問い合わせ
 function plain(url, title, h1, body) {
