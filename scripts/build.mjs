@@ -110,10 +110,17 @@ function answerHTML(pi, qTag = "div") {
 function shopLink(q) {
   const m = SITE.moshimoAmazon, r = SITE.moshimoRakuten;
   const wrap = (id, url) => `https://af.moshimo.com/af/c/click?a_id=${id.a_id}&p_id=${id.p_id}&pc_id=${id.pc_id}&pl_id=${id.pl_id}&url=${encodeURIComponent(url)}`;
-  if (m) return { href: wrap(m, `https://www.amazon.co.jp/s?k=${encodeURIComponent(q)}`), shop: "Amazon" };
-  if (r) return { href: wrap(r, `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(q)}/`), shop: "楽天" };
-  return null;
+  return shopLinks(q)[0] || null;
 }
+function shopLinks(q) {
+  const m = SITE.moshimoAmazon, r = SITE.moshimoRakuten, out = [];
+  const wrap = (id, url) => `https://af.moshimo.com/af/c/click?a_id=${id.a_id}&p_id=${id.p_id}&pc_id=${id.pc_id}&pl_id=${id.pl_id}&url=${encodeURIComponent(url)}`;
+  if (m) out.push({ href: wrap(m, `https://www.amazon.co.jp/s?k=${encodeURIComponent(q)}`), shop: "Amazon" });
+  if (r) out.push({ href: wrap(r, `https://search.rakuten.co.jp/search/mall/${encodeURIComponent(q)}/`), shop: "楽天" });
+  return out;
+}
+const shopBtns = q => { const L = shopLinks(q); return L.length ? `<span class="shopbtns">${L.map((x, i) => `<a class="shopbtn${i ? " alt" : ""}" href="${x.href}" target="_blank" rel="sponsored nofollow noopener">${x.shop}</a>`).join("")}</span>` : ""; };
+const shopNames = () => shopLinks("x").map(x => x.shop).join("・");
 // 流星群の前日・当日の案内に出す「持ち物チェック」
 const SHOP_QUICK = [["レジャーシート", "レジャーシート 厚手 大判"], ["赤いライト", "赤色ライト 天体観測"], ["カイロ・ブランケット", "アウトドア ブランケット"]]
   .map(([n, q]) => { const L = shopLink(q); return L ? { n, href: L.href, shop: L.shop } : null; }).filter(Boolean);
@@ -128,10 +135,10 @@ function kitHTML() {
       ["双眼鏡（7×50か8×42）", "すばるや天の川の星の粒が、肉眼とは別世界に見える", "双眼鏡 7x50 天体観測"]]]
   ];
   const any = !!shopLink("x");
-  const li = ([a, b, q]) => { const L = shopLink(q); return `<li><div><b>${a}</b><span>${b}</span></div>${L ? `<a class="shopbtn" href="${L.href}" target="_blank" rel="sponsored nofollow noopener">${L.shop}で見る</a>` : ""}</li>`; };
+  const li = ([a, b, q]) => { return `<li><div><b>${a}</b><span>${b}</span></div>${shopBtns(q)}</li>`; };
   return `<div class="kit">${any ? '<span class="lbl">PR（アフィリエイト広告を含みます）</span>' : ""}
         ${groups.map(([h, items]) => `<strong>${h}</strong><ul>${items.map(li).join("")}</ul>`).join("\n        ")}
-        ${any ? `<span class="lbl">リンク先は${shopLink("x").shop}の検索結果です</span>` : ""}</div>`;
+        ${any ? `<span class="lbl">リンク先は${shopNames()}の検索結果です</span>` : ""}</div>`;
 }
 
 function targetPanel(staticCard = "") {
@@ -375,7 +382,7 @@ allEv.forEach(e => {
       ["科学実験キット", "宇宙に限らず「試してみる」楽しさを知ると、理科全体が好きになります。", "科学 実験キット 小学生"]]]
   ];
   const any = !!shopLink("x");
-  const body = G.map(([age, lead, items]) => `<h2>${age}</h2><p>${lead}</p><ul class="giftlist">${items.map(([n, d, q]) => { const L = shopLink(q); return `<li><div><b>${n}</b><p>${d}</p></div>${L ? `<a class="shopbtn" href="${L.href}" target="_blank" rel="sponsored nofollow noopener">${L.shop}で見る</a>` : ""}</li>`; }).join("")}</ul>`).join("");
+  const body = G.map(([age, lead, items]) => `<h2>${age}</h2><p>${lead}</p><ul class="giftlist">${items.map(([n, d, q]) => `<li><div><b>${n}</b><p>${d}</p></div>${shopBtns(q)}</li>`).join("")}</ul>`).join("");
   write("/gift/", head({
     title: `宇宙好きの子へのプレゼント｜年齢別のおすすめ - ${SITE.name}`,
     desc: "宇宙や星が好きな子どもへのプレゼントを年齢別に紹介。おやすみ星空ライト、宇宙の図鑑、家庭用プラネタリウム、はじめての天体望遠鏡まで、選び方のポイントをまとめました。",
@@ -387,7 +394,7 @@ allEv.forEach(e => {
     ${body}
     <h2>どれを選ぶか迷ったら</h2>
     <p>高価な道具より、「毎日なんとなく目に入るもの」のほうが興味は続きやすいものです。そして一番効くのは、プレゼントを渡したあと、一緒に本物の空を見上げる時間です。<a href="/">今夜、星が見える時間</a>や<a href="/event/">流星群の日</a>を調べて、親子で外に出てみてください。</p>
-    ${any ? `<p class="kv">リンク先は${shopLink("x").shop}の検索結果です。商品の値段や在庫はリンク先でご確認ください。</p>` : ""}
+    ${any ? `<p class="kv">リンク先は${shopNames()}の検索結果です。商品の値段や在庫はリンク先でご確認ください。</p>` : ""}
   </section>
 ` + footer() + tail({}), { priority: 0.8, changefreq: "weekly" });
 }
