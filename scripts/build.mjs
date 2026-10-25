@@ -121,6 +121,13 @@ function shopLinks(q) {
 }
 const shopBtns = q => { const L = shopLinks(q); return L.length ? `<span class="shopbtns">${L.map((x, i) => `<a class="shopbtn${i ? " alt" : ""}" href="${x.href}" target="_blank" rel="sponsored nofollow noopener">${x.shop}</a>`).join("")}</span>` : ""; };
 const shopNames = () => shopLinks("x").map(x => x.shop).join("・");
+// 広告主と直接提携しているもしもアフィリエイトのリンク（公式サイトへ）
+const MOSHIMO_DIRECT = {
+  randoseru: { a_id: 5853964, p_id: 7345, pc_id: 21114, pl_id: 92318, label: "公式サイトで見る" },
+  starname: { a_id: 5853915, p_id: 6997, pc_id: 20009, pl_id: 88402, label: "公式サイトで見る" }
+};
+const directBtn = k => { const m = MOSHIMO_DIRECT[k]; if (!m) return ""; const qs = `a_id=${m.a_id}&p_id=${m.p_id}&pc_id=${m.pc_id}&pl_id=${m.pl_id}`;
+  return `<span class="shopbtns"><a class="shopbtn" href="https://af.moshimo.com/af/c/click?${qs}" target="_blank" rel="sponsored nofollow noopener" referrerpolicy="no-referrer-when-downgrade">${m.label}</a><img src="https://i.moshimo.com/af/i/impression?${qs}" width="1" height="1" alt="" loading="lazy" style="border:none;position:absolute"></span>`; };
 // プレゼント用のイラスト（線画。商品写真の代わり）
 const ICON = {
   light: '<path d="M14 40h20M18 40l2-9h8l2 9"/><path d="M16 31a8 8 0 0 1 16 0z"/><path d="M24 15v-5M15 18l-3-4M33 18l3-4M10 25H6M42 25h-4"/><circle cx="24" cy="23" r="1.2" class="f"/>',
@@ -134,6 +141,8 @@ const ICON = {
   disk: '<circle cx="24" cy="24" r="16"/><ellipse cx="24" cy="20" rx="10" ry="7"/><circle cx="21" cy="19" r="1.1" class="f"/><circle cx="27" cy="21" r="1.1" class="f"/><circle cx="24" cy="16" r="1.1" class="f"/><path d="M24 40v-4"/>',
   rock: '<path d="M10 30l4-13 11-6 11 5 3 12-8 9H16z"/><path d="M19 22l5 3 6-3M24 25v8"/><path d="M38 8l-4 4M42 14l-5 1M34 4l-1 5"/>',
   cam: '<rect x="12" y="6" width="14" height="22" rx="2.5"/><circle cx="19" cy="11" r="2"/><path d="M19 28v6M19 34l-8 8M19 34l8 8M19 34v8"/><path d="M33 12l1 2 2 .5-1.5 1.5.5 2-2-1-2 1 .5-2-1.5-1.5 2-.5z" class="f"/><circle cx="39" cy="22" r="1" class="f"/>',
+  bag: '<path d="M12 18a6 6 0 0 1 6-6h12a6 6 0 0 1 6 6v20a3 3 0 0 1-3 3H15a3 3 0 0 1-3-3z"/><path d="M12 22h24"/><path d="M19 12V9a5 5 0 0 1 10 0v3"/><rect x="21" y="25" width="6" height="5" rx="1"/><circle cx="17" cy="34" r="1" class="f"/><circle cx="31" cy="34" r="1" class="f"/>',
+  namestar: '<path d="M24 6l3.5 7.2 7.9 1.1-5.7 5.6 1.3 7.9L24 24.1l-7 3.7 1.3-7.9-5.7-5.6 7.9-1.1z"/><rect x="10" y="32" width="28" height="10" rx="2"/><path d="M15 37h18"/>',
   lab: '<path d="M19 8h10M21 8v12L11 38a2 2 0 0 0 2 3h22a2 2 0 0 0 2-3L27 20V8"/><path d="M15 31h18"/><circle cx="21" cy="35" r="1.3" class="f"/><circle cx="27" cy="34" r="1" class="f"/>'
 };
 const icon = k => `<svg class="gi" viewBox="0 0 48 48" aria-hidden="true">${ICON[k] || ""}</svg>`;
@@ -142,7 +151,7 @@ function giftCard() {
   return `  <section class="giftcard" aria-label="宇宙好きの子へのプレゼント">
     <a href="/gift/">
       <div class="gicons">${icon("light")}${icon("zukan")}${icon("scope")}</div>
-      <div class="gtext"><span class="eb">クリスマス・誕生日に</span><h2>宇宙好きの子へのプレゼント選び</h2><p>3〜5歳から小学生まで年齢別に、星や宇宙への「なんで？」を伸ばす道具をまとめました。大人も楽しめるものもあります。</p></div>
+      <div class="gtext"><span class="eb">クリスマス・誕生日に</span><h2>宇宙好きの子へのプレゼント選び</h2><p>3〜5歳から入学準備、小学生まで年齢別に、星や宇宙への「なんで？」を伸ばす道具をまとめました。大人も楽しめるものもあります。</p></div>
       <span class="gbtn">年齢別に見る →</span>
     </a>
   </section>
@@ -399,6 +408,8 @@ allEv.forEach(e => {
       ["おやすみ星空ライト", "天井や壁に星を映すライト。寝る前の部屋が小さなプラネタリウムに。タイマー付きだと寝落ちしても安心です。", "星空 プロジェクター ライト 子供", "light"],
       ["宇宙の絵本", "月や星を主人公にした絵本は、寝る前の読み聞かせにぴったり。「宇宙 絵本」で探すと、写真が中心のものからお話のものまであります。", "宇宙 絵本 幼児", "book"],
       ["光る星のシール", "天井に貼ると、電気を消したあとにぼんやり光ります。自分で星座の形に貼ってみるのも楽しい遊びです。", "蓄光 星 シール 天井", "sticker"]]],
+    ["年長さん（入学準備）", "来年の春に小学生になる子へ。毎日使うものだからこそ、宇宙好きの気持ちに合うものを。", [
+      ["地球NASAランドセル", "NASAのために開発された衝撃吸収素材「テンパーフォーム」を肩ベルトと背中に使った、体への負担を減らすランドセルです。大容量モデルでも約1.2kgと軽く、日本製で6年間の修理保証つき。名前のとおり「地球」がモチーフで、宇宙好きの子にぴったりです。", null, "bag", "randoseru"]]],
     ["小学校低学年", "「なんで？」が一番多い時期。調べる道具があると、興味が長続きします。", [
       ["宇宙の図鑑", "「講談社の動く図鑑MOVE 宇宙」や「小学館の図鑑NEO 宇宙」など。DVD付きの巻なら、映像から入れるので本が苦手な子にも。", "図鑑 宇宙 DVD付き", "zukan"],
       ["家庭用プラネタリウム", "部屋の天井いっぱいに星空を映せます。おもちゃ売り場のものより、映る星の数や明るさで選ぶのがおすすめ。", "家庭用 プラネタリウム", "dome"],
@@ -413,10 +424,11 @@ allEv.forEach(e => {
       ["本格派の家庭用プラネタリウム", "おもちゃとは別物の、数万〜数百万個の星を映すタイプがあります。部屋を暗くして寝転べば、大人のリラックスタイムにも。", "家庭用プラネタリウム 本格 ホームスター", "dome"],
       ["隕石の標本・アクセサリー", "数十億年前に宇宙で生まれた石を、手のひらにのせられます。小さな標本なら数千円から。話のタネになる贈り物です。", "隕石 標本", "rock"],
       ["スマホで星を撮る三脚", "最近のスマホは夜景モードで星も写ります。しっかりした三脚とリモコンがあれば、流星群や天の川の撮影にも挑戦できます。", "スマホ 三脚 リモコン 星空 撮影", "cam"],
+      ["星に名前をつけるギフト", "星をひとつ選んで名前をつけ、命名証明書とメッセージカードにして贈るギフトです。誕生日や結婚記念日、プロポーズなど「特別な日」の演出に。※天文学で使われる正式な星の名前になるわけではなく、記念として楽しむギフトです。", null, "namestar", "starname"],
       ["自動導入の天体望遠鏡", "見たい天体を選ぶと、望遠鏡が自動でそちらを向くタイプ。星座に詳しくなくても、土星の輪や木星のしま模様をすぐに見られます。", "天体望遠鏡 自動導入", "scope"]]]
   ];
   const any = !!shopLink("x");
-  const body = G.map(([age, lead, items], i) => `<h2 id="age${i + 1}">${age}</h2><p>${lead}</p><ul class="giftlist">${items.map(([n, d, q, ic]) => `<li>${icon(ic)}<div><b>${n}</b><p>${d}</p></div>${shopBtns(q)}</li>`).join("")}</ul>`).join("");
+  const body = G.map(([age, lead, items], i) => `<h2 id="age${i + 1}">${age}</h2><p>${lead}</p><ul class="giftlist">${items.map(([n, d, q, ic, dk]) => `<li>${icon(ic)}<div><b>${n}</b><p>${d}</p></div>${dk ? directBtn(dk) : shopBtns(q)}</li>`).join("")}</ul>`).join("");
   const jump = `<nav class="agejump" aria-label="年齢で選ぶ">${G.map(([age], i) => `<a href="#age${i + 1}">${age}</a>`).join("")}</nav>`;
   write("/gift/", head({
     title: `宇宙好きの子へのプレゼント｜年齢別・大人向けのおすすめ - ${SITE.name}`,
@@ -430,7 +442,7 @@ allEv.forEach(e => {
     ${body}
     <h2>どれを選ぶか迷ったら</h2>
     <p>高価な道具より、「毎日なんとなく目に入るもの」のほうが興味は続きやすいものです。そして一番効くのは、プレゼントを渡したあと、一緒に本物の空を見上げる時間です。<a href="/">今夜、星が見える時間</a>や<a href="/event/">流星群の日</a>を調べて、親子で外に出てみてください。</p>
-    ${any ? `<p class="kv">リンク先は${shopNames()}の検索結果です。商品の値段や在庫はリンク先でご確認ください。</p>` : ""}
+    ${any ? `<p class="kv">「Amazon」「楽天」のリンク先は各サイトの検索結果、「公式サイトで見る」は各商品の公式サイトです。商品の値段や在庫はリンク先でご確認ください。</p>` : ""}
   </section>
 ` + footer() + tail({}), { priority: 0.8, changefreq: "weekly" });
 }
