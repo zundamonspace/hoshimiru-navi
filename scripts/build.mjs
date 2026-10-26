@@ -9,6 +9,11 @@ const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..")
 const SRC = path.join(ROOT, "site");
 const OUT = path.join(ROOT, "dist");
 const core = require(path.join(SRC, "assets", "core.js"));
+import G1 from "./guides1.mjs";
+import G2 from "./guides2.mjs";
+import { SEIZA_EXTRA, EVENT_EXTRA } from "./extra.mjs";
+const GUIDES = [...G1, ...G2];
+const GUIDE_DATE = "2026年10月26日";
 const { PLACES, CONS, FIG, FAMOUS, MYTH, SITE, REGIONS, esc } = core;
 
 const readJSON = f => { try { return JSON.parse(fs.readFileSync(f, "utf8")); } catch { return null; } };
@@ -81,7 +86,7 @@ function footer() {
     `<div><b>${s}</b><p>${CONS.filter(C => !C.mw && C.season === s && C.lv <= 2).map(C => `<a href="/seiza/${C.slug}/">${C.short}</a>`).join("")}</p></div>`).join("");
   return `  <footer class="foot">
     <section class="links"><h2>都道府県の星空</h2><div class="linkgrid">${regions}</div></section>
-    <section class="links"><h2>主な星座</h2><div class="linkgrid">${seasons}</div><p><a href="/seiza/">88星座の一覧を見る →</a>　<a href="/event/">流星群カレンダー →</a>　<a href="/gift/">宇宙好きの子へのプレゼント →</a></p></section>
+    <section class="links"><h2>主な星座</h2><div class="linkgrid">${seasons}</div><p><a href="/seiza/">88星座の一覧を見る →</a>　<a href="/event/">流星群カレンダー →</a>　<a href="/guide/">星空観察ガイド →</a>　<a href="/gift/">宇宙好きの子へのプレゼント →</a></p></section>
     <nav class="footnav"><a href="/about/">運営者情報</a><a href="/privacy/">プライバシーポリシー</a><a href="/contact/">お問い合わせ</a><a href="${SITE.youtube}" target="_blank" rel="noopener">YouTube</a><a href="${SITE.x}" target="_blank" rel="noopener">X</a></nav>
     <p class="fine">※当サイトはアフィリエイト広告を利用しています。<br>雲の予報：<a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>（CC BY 4.0）のデータをもとに加工。日の入り・薄明・月・星座の位置は当サイトで計算しています。予報は外れることがあります。<br>© ${Y} ${SITE.name}</p>
   </footer>`;
@@ -156,6 +161,10 @@ function giftCard() {
     </a>
   </section>
 `;
+}
+// 読みもの一覧カード
+function guideCards(list = GUIDES) {
+  return `<ul class="cards guidecards">${list.map(g => `<li><a href="/guide/${g.slug}/"><b>${esc(g.h1)}</b><span>${esc(g.desc.slice(0, 60))}…</span></a></li>`).join("")}</ul>`;
 }
 // 流星群の前日・当日の案内に出す「持ち物チェック」
 const SHOP_QUICK = [["レジャーシート", "レジャーシート 厚手 大判"], ["赤いライト", "赤色ライト 天体観測"], ["カイロ・ブランケット", "アウトドア ブランケット"]]
@@ -294,6 +303,11 @@ write("/", head({
     <h2>${SITE.name}について</h2>
     <p>${SITE.name}は、雲の予報・空の暗さ・月明かりを組み合わせて、星が見える時間を30分ごとに予報するサイトです。日の入り後に空が十分暗くなる時刻や、月が沈む時刻も場所ごとに計算しています。上の検索から都道府県を選ぶと、その場所の今夜の見頃と、見える星座の位置が分かります。</p>
   </section>
+  <section class="intro">
+    <h2>星空観察ガイド</h2>
+    <p class="sub">はじめての星空観察から、双眼鏡・望遠鏡の選び方、スマホでの撮り方まで。</p>
+    ${guideCards()}
+  </section>
 ` + footer() + tail({}), { priority: 1.0, changefreq: "hourly" });
 
 // 都道府県
@@ -353,7 +367,8 @@ CONS.forEach(C => {
     jsonld: [crumbsLD([["88星座", "/seiza/"], [C.short, null]])]
   }) + topbar() + crumbs([["88星座", "/seiza/"], [C.short]]) + `
   <section class="intro top-intro"><h1>${C.mw ? "天の川が見える時期と場所" : `${C.short}の見つけ方`}</h1><p>${lead}</p></section>
-` + appHTML({ pi: TOKYO, targetFirst: true, staticCard: staticCard(C) }) + footer() + tail({ target: C.n }), { priority: C.lv <= 2 ? 0.8 : 0.6, changefreq: "weekly" });
+` + appHTML({ pi: TOKYO, targetFirst: true, staticCard: staticCard(C) }) + (SEIZA_EXTRA[C.slug] ? `  <section class="intro extra">${SEIZA_EXTRA[C.slug]}</section>
+` : "") + footer() + tail({ target: C.n }), { priority: C.lv <= 2 ? 0.8 : 0.6, changefreq: "weekly" });
 });
 
 // イベント
@@ -393,12 +408,36 @@ allEv.forEach(e => {
     <p>${e.tip}${/空全体/.test(e.tip)?"":"流れ星は放射点を中心に四方へ飛ぶので、放射点だけを見つめるより、空を広く見渡すのがコツです。"}目が暗さに慣れるまで15分ほどかかるので、スマホの画面はできるだけ見ないようにしましょう。</p>
   </section>
 ` + appHTML({ pi: TOKYO }) + `
+${EVENT_EXTRA[e.k] ? `  <section class="intro extra">${EVENT_EXTRA[e.k]}<p>見るときのコツは<a href="/guide/meteor/">流星群をたくさん見るコツ</a>で詳しく紹介しています。</p></section>` : ""}
   <section class="intro">
     <h2>都道府県ごとの見頃の時間</h2>
     <p class="sub">${dd >= 0 && dd <= 8 ? "雲の予報を含めた" : "雲を考えず、空の暗さ・放射点の高さ・月明かりから計算した"}見頃の時間帯です（各県の代表地点）。</p>
     <div class="tablewrap"><table class="evtable"><thead><tr><th>都道府県</th><th>見頃の時間</th></tr></thead><tbody>${rows}</tbody></table></div>
   </section>
 ` + footer() + tail({ target: e.c, day: dd >= 0 && dd <= 3 ? dd : undefined }), { priority: 0.8, changefreq: "daily" });
+});
+
+// 星空観察ガイド（読みもの）
+write("/guide/", head({
+  title: `星空観察ガイド｜はじめ方・道具の選び方・撮り方 - ${SITE.name}`,
+  desc: "星空観察のはじめ方、流星群の見方、子どもと星を見るコツ、双眼鏡・望遠鏡の選び方、スマホでの星空撮影まで。星を見るのに役立つ読みものをまとめています。",
+  url: "/guide/", jsonld: [crumbsLD([["星空観察ガイド", "/guide/"]])]
+}) + topbar() + crumbs([["星空観察ガイド"]]) + `<section class="intro"><h1>星空観察ガイド</h1><p>星を見に出かける前に知っておくと役立つことを、テーマごとにまとめています。はじめての人は「はじめての星空観察ガイド」から読んでみてください。</p>${guideCards()}</section>` + footer() + tail({}), { priority: 0.8, changefreq: "weekly" });
+GUIDES.forEach(g => {
+  const rel = (g.related || []).map(k => GUIDES.find(x => x.slug === k)).filter(Boolean);
+  write(`/guide/${g.slug}/`, head({
+    title: `${g.title}｜${SITE.name}`, desc: g.desc, url: `/guide/${g.slug}/`,
+    jsonld: [crumbsLD([["星空観察ガイド", "/guide/"], [g.h1, null]]), { "@context": "https://schema.org", "@type": "Article", headline: g.h1, description: g.desc, datePublished: "2026-10-26", dateModified: "2026-10-26", author: { "@type": "Organization", name: "宇宙と謎のずんだ研究所", url: SITE.youtube }, publisher: { "@type": "Organization", name: SITE.name, url: SITE.url } }]
+  }) + topbar() + crumbs([["星空観察ガイド", "/guide/"], [g.h1]]) + `
+  <article class="doc guide">
+    <h1>${g.h1}</h1>
+    <p class="meta">${GUIDE_DATE}更新　文：<a href="/about/">${SITE.name}編集部</a></p>
+    <p class="lead">${g.lead}</p>
+    ${g.body}
+    <aside class="cta"><b>今夜、星は見える？</b><p>雲・空の暗さ・月明かりから、星が見える時間を30分ごとに予報しています。</p><a class="btnlink" href="/">今夜の星空予報を見る</a></aside>
+    ${rel.length ? `<h2>あわせて読みたい</h2>${guideCards(rel)}` : ""}
+  </article>
+` + footer() + tail({}), { priority: 0.7, changefreq: "monthly" });
 });
 
 // 宇宙好きの子へのプレゼント（年齢別）
@@ -458,7 +497,13 @@ plain("/about/", "運営者情報", "運営者情報", `
 <h2>このサイトについて</h2>
 <p>${SITE.name}は、「今夜、星はいつ見えるのか」に答えるための星空情報サイトです。雲の予報、日の入り後の空の暗さ、月明かりを組み合わせて、星が見える時間帯を30分ごとに予報しています。あわせて、今夜見える星座の星図、88星座の見つけ方と神話、流星群の見頃の時間と方角を紹介しています。</p>
 <h2>データについて</h2>
-<p>雲の予報は、ノルウェー気象局（MET Norway）が公開している予報データ（CC BY 4.0）を加工して使っています。日の入り・薄明・月の満ち欠けと位置・星座の位置は、公開されている天文計算式をもとに当サイトで計算しています。予報は外れることがあり、また計算には数分程度の誤差があります。</p>`);
+<p>雲の予報は、ノルウェー気象局（MET Norway）が公開している予報データ（CC BY 4.0）を加工して使っています。日の入り・薄明・月の満ち欠けと位置・星座の位置は、公開されている天文計算式をもとに当サイトで計算しています。予報は外れることがあり、また計算には数分程度の誤差があります。</p>
+<h2>運営者について</h2>
+<p>${SITE.name}は、YouTubeチャンネル「宇宙と謎のずんだ研究所」が運営しています。チャンネルでは、宇宙・天文・地球科学の話題や、世界のふしぎを科学で検証する解説動画を毎日公開しています。動画を見て「実際に星を見てみたい」と思った人が、すぐに今夜の空を確かめられる場所がほしいと考え、このサイトを作りました。</p>
+<h2>記事の作り方</h2>
+<p><a href="/guide/">星空観察ガイド</a>や星座・流星群の解説は、国立天文台やNASAなどの公的機関・研究機関が公開している情報や、天文学の一般的な知見をもとに、はじめての人にもわかりやすい言葉で書いています。数値（距離・明るさ・温度など）には観測や研究によって幅があるものもあるため、「約」「ほど」などの表現を使っています。内容に誤りを見つけた場合は、<a href="/contact/">お問い合わせ</a>からお知らせください。確認のうえ修正します。</p>
+<h2>広告について</h2>
+<p>当サイトは、運営費をまかなうためにアフィリエイト広告を利用しています。商品を紹介するページには、その旨を表示しています。紹介する商品は、星空観察や宇宙への興味に役立つかどうかを基準に選んでいます。</p>`);
 
 plain("/privacy/", "プライバシーポリシー", "プライバシーポリシー", `
 <h2>広告について</h2>
