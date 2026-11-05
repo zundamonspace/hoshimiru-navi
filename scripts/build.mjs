@@ -310,6 +310,16 @@ write("/", head({
   </section>
 ` + footer() + tail({}), { priority: 1.0, changefreq: "hourly" });
 
+// 流星群の見頃の時間（県ごと）。予報範囲内なら雲も考える
+const today = Date.UTC(...core.jstNow());
+function evWindow(e, pi, dd) {
+  const P = PLACES[pi];
+  if (dd >= 0 && dd <= 8) { const { best, slots } = core.meteorWindowAt(e, pi, dd, WEATHER); return best ? core.windowText(slots, best) : "条件が悪い"; }
+  const dayStart = e.t - 9 * 3600e3 + 17 * 3600e3;
+  const slots = Array.from({ length: 26 }, (_, i) => { const t = dayStart + i * 1800e3; const sa = core.sunAlt(t, P), mp = core.moonPos(t, P), il = core.illum(t).f, r = core.horiz(t, P.lat, P.lng, e.ra * 15 * core.R, e.de * core.R); const ml = mp.alt > 0 ? il * Math.min(1, (mp.alt + 5) / 30) : 0; return { t, v: sa < -18 && r.alt > 20 ? Math.sin(r.alt * core.R) * (1 - .6 * ml) : 0 }; });
+  const ok = slots.filter(s => s.v > .15); return ok.length ? `${core.nx(ok[0].t)}${core.fmt(ok[0].t)}〜${core.nx(ok[ok.length - 1].t + 1800e3)}${core.fmt(ok[ok.length - 1].t + 1800e3)}` : "条件が悪い";
+}
+
 // 都道府県
 const prefIndexBody = REGIONS.map(([s], k) => {
   const e = k + 1 < REGIONS.length ? REGIONS[k + 1][0] : PLACES.length;
@@ -328,12 +338,14 @@ PLACES.forEach((P, pi) => {
   const S = core.summary(pi, 0, WEATHER);
   const seasonal = CONS.filter(C => !C.mw && C.lv <= 2).map(C => ({ C, b: core.bestFor(C, S.slots, P) })).filter(o => o.b && o.b.alt >= 30).sort((a, b) => b.b.alt - a.b.alt).slice(0, 8);
   const easyTxt = P.b >= 8 ? "街明かりが強いため、見えるのは明るい星や一等星が中心です" : P.b >= 7 ? "街なかでも明るい星座なら形が分かります" : "少し郊外に出ると、たくさんの星が見えます";
-  const desc = `${P.full}（${P.c}）の今夜の星空予報。${S.best ? "今夜は" + core.windowText(S.slots, S.best) + "が見頃。" : ""}星が見える時間を30分ごとに予報し、今夜見える星座や天の川が見える場所（${P.mw}）も紹介します。`;
+  const desc = `${P.full}（${P.c}）の今日の星空予報。今夜の星空指数は${S.idx}。${S.best ? core.windowText(S.slots, S.best) + "が見頃。" : ""}星が見える時間を30分ごとに予報し、今夜見える星座や流星群の見頃、天の川が見える場所（${P.mw}）も紹介します。`;
+  const nev = core.eventsFrom(today).filter(e => e.t >= today && e.t <= today + 60 * core.DAY).sort((a, b) => a.t - b.t)[0];
+  const nevHTML = nev ? (() => { const x = new Date(nev.t), dd = Math.round((nev.t - today) / core.DAY); const w = evWindow(nev, pi, dd); return `<div class="nextev"><span class="eb">次の流星群</span><b><a href="/event/${nev.slug}/">${nev.n}</a>　${x.getUTCMonth() + 1}月${x.getUTCDate()}日(${core.WD[x.getUTCDay()]})の夜</b><p>${P.full}での見頃：${w === "条件が悪い" ? "この夜は条件が悪そうです" : w}　${nev.rate}</p></div>`; })() : "";
   write(`/pref/${P.slug}/`, head({
-    title: `${P.full}の星空予報｜今夜星が見える時間と見える星座 - ${SITE.name}`,
+    title: `${P.full}の今日の星空予報｜星空指数・星が見える時間と見える星座 - ${SITE.name}`,
     desc, url: `/pref/${P.slug}/`, jsonld: [crumbsLD([["都道府県の星空", "/pref/"], [P.full + "の星空", null]])]
   }) + topbar() + crumbs([["都道府県の星空", "/pref/"], [P.full]]) + `
-  <section class="intro top-intro"><h1>${P.full}の星空予報</h1></section>
+  <section class="intro top-intro"><h1>${P.full}の今日の星空予報</h1>${nevHTML}</section>
 ` + appHTML({ pi }) + `
   <section class="intro">
     <h2>${P.full}で星を見るなら</h2>
@@ -353,26 +365,38 @@ write("/seiza/", head({
 ${SEASONS.map(s => `<h2>${s}</h2><ul class="cards">${CONS.filter(C => C.season === s && !C.mw).map(C => `<li><a href="/seiza/${C.slug}/"><b>${C.short}</b><span>${C.star ? esc(C.star) : esc(C.note)}</span></a></li>`).join("")}</ul>`).join("")}
 <h2>天の川</h2><ul class="cards"><li><a href="/seiza/milky-way/"><b>天の川</b><span>夏の濃い部分が見える時期と場所</span></a></li></ul></section>` + footer() + tail({}), { priority: 0.8, changefreq: "weekly" });
 
+// 星座の漢字表記（「射手座 いつ見える」などで検索されるため）
+const KANJI = { "おひつじ座": "牡羊座", "おうし座": "牡牛座", "ふたご座": "双子座", "かに座": "蟹座", "しし座": "獅子座", "おとめ座": "乙女座", "てんびん座": "天秤座", "さそり座": "蠍座", "いて座": "射手座", "やぎ座": "山羊座", "みずがめ座": "水瓶座", "うお座": "魚座", "はくちょう座": "白鳥座", "こと座": "琴座", "わし座": "鷲座", "おおぐま座": "大熊座", "こぐま座": "小熊座", "くじら座": "鯨座", "おおいぬ座": "大犬座", "こいぬ座": "小犬座", "カシオペヤ座": "カシオペア座", "かんむり座": "冠座", "へびつかい座": "蛇遣座", "うしかい座": "牛飼座", "ぎょしゃ座": "馭者座" };
 CONS.forEach(C => {
-  const P = PLACES[TOKYO], months = core.monthRange(core.bestMonths(C, P)), fam = core.famousOf(C);
+  const P = PLACES[TOKYO], bm = core.bestMonths(C, P), months = core.monthRange(bm), fam = core.famousOf(C);
   const maxAlt = 90 - Math.abs(P.lat - C.de);
   const where = PLACES.filter(p => 90 - Math.abs(p.lat - C.de) > 2).map(p => p.p);
-  const title = C.mw ? `天の川が見える時期・時間・場所｜${SITE.name}` : `${C.short}の見つけ方・見える時期と方角｜${SITE.name}`;
-  const lead = maxAlt <= 2
-    ? `${C.short}は、東京など本州の多くの場所からは地平線の上に昇らない南の星座です。${where.length ? `日本では${where.join("・")}などから、南の地平線すれすれに見えることがあります。` : "日本からは見ることができません。"}`
-    : `${C.short}は${months ? `${months}ごろの夜9時に` : ""}見やすくなる${C.season.replace("の星座", "")}の${C.mw ? "星空" : "星座"}です。${C.star ? `目印は${esc(C.star)}。` : ""}${esc(C.note)}。`;
-  const desc = `${lead}${fam.length ? `${fam.slice(0, 3).join("・")}などの有名な星の解説と、` : ""}星座の神話、今夜あなたの場所で見える時刻と方角が分かります。`.slice(0, 160);
+  const alias = KANJI[C.short] ? `（${KANJI[C.short]}）` : "";
+  const circ = C.de > 90 - P.lat;
+  const dir = C.de > P.lat ? (circ ? "北の空" : "北の空の高いところ") : maxAlt >= 75 ? "頭の真上近く" : maxAlt < 30 ? "南の低い空" : "南の空";
+  const invisible = maxAlt <= 2;
+  const title = C.mw ? `天の川はいつ見える？見える時期・時間・場所｜${SITE.name}`
+    : invisible ? `${C.short}は日本から見える？見える場所と時期｜${SITE.name}`
+    : `${C.short}${alias}はいつ見える？見える時期・時間・方角｜${SITE.name}`;
+  const h1 = C.mw ? "天の川はいつ見える？見える時期と場所" : invisible ? `${C.short}は日本から見える？` : `${C.short}${alias}はいつ見える？`;
+  const shift = bm.length && bm.length < 12 ? `見頃より前の月は夜おそく、後の月は夕方の早い時間に見えます。` : "";
+  const lead = invisible
+    ? `${C.short}${alias}は、東京など本州の多くの場所からは地平線の上に昇らない南の星座です。${where.length ? `日本では${where.join("・")}などから、南の地平線すれすれに見えることがあります。` : "日本からは見ることができません。"}`
+    : circ ? `<b>${C.short}${alias}は一年中見える星座です。</b>北極星のまわりを回っていて、本州では地平線の下に沈みません。特に見やすいのは${months ? `${months}ごろの夜9時、` : ""}${dir}の高いところにあるときです。${C.star ? `目印は${esc(C.star)}。` : ""}`
+    : `<b>${C.short}${alias}がよく見えるのは${months ? `${months}ごろ` : ""}の夜9時ごろ、${dir}です。</b>${shift}${C.star ? `目印は${esc(C.star)}。` : ""}${esc(C.note)}。`;
+  const plainLead = lead.replace(/<[^>]+>/g, "");
+  const desc = invisible ? `${plainLead}`.slice(0, 160)
+    : `${C.short}${alias}はいつ見える？${circ ? "一年中見える星座で、" : ""}見頃は${months || "—"}の夜9時ごろ、${dir}。今夜あなたの場所で見える時刻と方角、見つけ方${fam.length ? `、${fam.slice(0, 2).join("・")}など有名な星` : ""}、神話を紹介します。`.slice(0, 160);
   write(`/seiza/${C.slug}/`, head({
     title, desc, url: `/seiza/${C.slug}/`,
     jsonld: [crumbsLD([["88星座", "/seiza/"], [C.short, null]])]
   }) + topbar() + crumbs([["88星座", "/seiza/"], [C.short]]) + `
-  <section class="intro top-intro"><h1>${C.mw ? "天の川が見える時期と場所" : `${C.short}の見つけ方`}</h1><p>${lead}</p></section>
+  <section class="intro top-intro"><h1>${h1}</h1><p>${lead}</p></section>
 ` + appHTML({ pi: TOKYO, targetFirst: true, staticCard: staticCard(C) }) + (SEIZA_EXTRA[C.slug] ? `  <section class="intro extra">${SEIZA_EXTRA[C.slug]}</section>
 ` : "") + footer() + tail({ target: C.n }), { priority: C.lv <= 2 ? 0.8 : 0.6, changefreq: "weekly" });
 });
 
 // イベント
-const today = Date.UTC(...core.jstNow());
 const allEv = core.eventsFrom(today).filter(e => e.t >= today - 30 * core.DAY).sort((a, b) => a.t - b.t);
 write("/event/", head({
   title: `流星群カレンダー ${Y}–${Y + 1}｜見頃の日・時間・方角 - ${SITE.name}`,
@@ -384,18 +408,7 @@ write("/event/", head({
 allEv.forEach(e => {
   const x = new Date(e.t), date = `${x.getUTCFullYear()}年${x.getUTCMonth() + 1}月${x.getUTCDate()}日(${core.WD[x.getUTCDay()]})`;
   const dd = Math.round((e.t - today) / core.DAY), f = core.illum(e.t + 16 * 3600e3).f;
-  const rows = PLACES.map((P, pi) => {
-    const dayIdx = dd >= 0 && dd <= 8 ? dd : null;
-    let txt = "—";
-    if (dayIdx != null) { const { best, slots } = core.meteorWindowAt(e, pi, dayIdx, WEATHER); txt = best ? core.windowText(slots, best) : "条件が悪い"; }
-    else {
-      // 予報の範囲外：雲を考えずに暗さ・放射点・月だけで計算
-      const dayStart = e.t - 9 * 3600e3 + 17 * 3600e3;
-      const slots = Array.from({ length: 26 }, (_, i) => { const t = dayStart + i * 1800e3; const sa = core.sunAlt(t, P), mp = core.moonPos(t, P), il = core.illum(t).f, r = core.horiz(t, P.lat, P.lng, e.ra * 15 * core.R, e.de * core.R); const ml = mp.alt > 0 ? il * Math.min(1, (mp.alt + 5) / 30) : 0; return { t, v: sa < -18 && r.alt > 20 ? Math.sin(r.alt * core.R) * (1 - .6 * ml) : 0 }; });
-      const ok = slots.filter(s => s.v > .15); txt = ok.length ? `${core.nx(ok[0].t)}${core.fmt(ok[0].t)}〜${core.nx(ok[ok.length - 1].t + 1800e3)}${core.fmt(ok[ok.length - 1].t + 1800e3)}` : "条件が悪い";
-    }
-    return `<tr><td><a href="/pref/${P.slug}/">${P.full}</a></td><td>${txt}</td></tr>`;
-  }).join("");
+  const rows = PLACES.map((P, pi) => `<tr><td><a href="/pref/${P.slug}/">${P.full}</a></td><td>${evWindow(e, pi, dd)}</td></tr>`).join("");
   const C = CONS.find(c => c.n === e.c);
   write(`/event/${e.slug}/`, head({
     title: `${e.n} ${e.y}の見頃はいつ？時間・方角・月明かり｜${SITE.name}`,

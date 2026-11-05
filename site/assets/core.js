@@ -434,8 +434,9 @@ function summary(pi,dayIdx,weather){const P=PLACES[pi],slots=nightSlots(pi,dayId
   const avg=cl.length?Math.round(cl.reduce((a,x)=>a+x.cloud,0)/cl.length):null;
   const visN=CONS.filter(C=>!C.mw).filter(C=>{const b=bestFor(C,slots,P);return b&&b.alt>=25}).length;
   const head=best?`<em>${windowText(slots,best)}</em> が見頃`:(avg!=null&&avg>70?`今夜は<em>雲が多く見えにくい</em>`:`今夜は<em>見えにくい</em>`);
-  const why=`空が暗くなるのは${darkStart?fmt(darkStart.t):"—"}ごろ。${avg!=null?`夜の平均雲量は${avg}%`:"雲の予報はまだありません（暗さと月明かりだけで判定）"}、月の明るさは${Math.round(il.f*100)}%。${visN}個の星座が見やすい高さに来ます。`;
-  return{slots,best,head,why,avg,il}}
+  const top=slots.map(x=>x.s).sort((a,b)=>b-a).slice(0,4),idx=Math.round(top.reduce((a,b)=>a+b,0)/4*(1-.04*Math.max(0,(P.b||4)-3)));
+  const why=`星空指数は${idx}（100点満点）。空が暗くなるのは${darkStart?fmt(darkStart.t):"—"}ごろ。${avg!=null?`夜の平均雲量は${avg}%`:"雲の予報はまだありません（暗さと月明かりだけで判定）"}、月の明るさは${Math.round(il.f*100)}%。${visN}個の星座が見やすい高さに来ます。`;
+  return{slots,best,head,why,avg,il,idx}}
 
 // ---- 星座の季節・見える場所 ----
 function monthsAlt(C,P){const[y]=jstNow();return Array.from({length:12},(_,m)=>conPos(Date.UTC(y,m,15,12,0),P,C).alt)}
