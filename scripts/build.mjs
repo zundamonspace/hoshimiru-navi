@@ -397,7 +397,8 @@ CONS.forEach(C => {
 });
 
 // イベント
-const allEv = core.eventsFrom(today).filter(e => e.t >= today - 30 * core.DAY).sort((a, b) => a.t - b.t);
+// 過去の流星群のページも残す（消すと404になるため）。2026年分から、来年分まで
+const allEv = [...core.eventsFrom(Date.UTC(Y - 1, 6, 1)), ...core.eventsFrom(today)].filter((e, i, a) => e.y >= 2026 && a.findIndex(x => x.slug === e.slug) === i).sort((a, b) => a.t - b.t);
 write("/event/", head({
   title: `流星群カレンダー ${Y}–${Y + 1}｜見頃の日・時間・方角 - ${SITE.name}`,
   desc: "主な流星群の極大日と見頃の時間、月明かりの条件をまとめた流星群カレンダー。都道府県ごとの見頃の時間も分かります。",
@@ -416,7 +417,7 @@ allEv.forEach(e => {
     url: `/event/${e.slug}/`,
     jsonld: [crumbsLD([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`, null]])]
   }) + topbar() + crumbs([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`]]) + `
-  <section class="intro top-intro"><h1>${e.n} ${e.y}の見頃</h1>
+  <section class="intro top-intro"><h1>${e.n} ${e.y}の見頃</h1>${e.t < today - core.DAY ? (() => { const nx = allEv.find(z => z.k === e.k && z.t >= today); const nd = nx && new Date(nx.t); return `<div class="nextev"><span class="eb">この流星群は終わりました</span><b>${nx ? `次回は<a href="/event/${nx.slug}/">${nd.getUTCFullYear()}年${nd.getUTCMonth() + 1}月${nd.getUTCDate()}日の夜</a>です` : "次回の日程は流星群カレンダーで確認できます"}</b><p>今後の流星群は<a href="/event/">流星群カレンダー</a>にまとめています。</p></div>`; })() : ""}
     <dl class="evfacts"><dt>極大</dt><dd>${date}の夜</dd><dt>流れる数</dt><dd>${e.rate}</dd><dt>放射点</dt><dd><a href="/seiza/${C ? C.slug : ""}/">${e.c}</a>の方向</dd><dt>月明かり</dt><dd>${f < .3 ? "少なめで好条件" : f < .65 ? "やや邪魔" : "強め"}（月の輝き${Math.round(f * 100)}%）</dd></dl>
     <p>${e.tip}${/空全体/.test(e.tip)?"":"流れ星は放射点を中心に四方へ飛ぶので、放射点だけを見つめるより、空を広く見渡すのがコツです。"}目が暗さに慣れるまで15分ほどかかるので、スマホの画面はできるだけ見ないようにしましょう。</p>
   </section>
