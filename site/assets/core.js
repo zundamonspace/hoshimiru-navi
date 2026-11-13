@@ -393,6 +393,7 @@ const SITE={name:"ほしみるナビ",url:"https://hoshimiru-navi.com",
   // もしもアフィリエイトの提携ID。空(null)なら商品リンクを出さない
   moshimoRakuten:{a_id:5851169,p_id:54,pc_id:54,pl_id:616},
   moshimoAmazon:{a_id:5852216,p_id:170,pc_id:185,pl_id:4062},
+  moshimoTravel:{a_id:5899328,p_id:55,pc_id:55,pl_id:624},
   adsenseClient:"ca-pub-3529852718871848"   // AdSenseのca-pub-…。空なら広告を出さない
 };
 const PREF_SLUG=["hokkaido","aomori","iwate","miyagi","akita","yamagata","fukushima","ibaraki","tochigi","gunma","saitama","chiba","tokyo","kanagawa","niigata","toyama","ishikawa","fukui","yamanashi","nagano","gifu","shizuoka","aichi","mie","shiga","kyoto","osaka","hyogo","nara","wakayama","tottori","shimane","okayama","hiroshima","yamaguchi","tokushima","kagawa","ehime","kochi","fukuoka","saga","nagasaki","kumamoto","oita","miyazaki","kagoshima","okinawa"];

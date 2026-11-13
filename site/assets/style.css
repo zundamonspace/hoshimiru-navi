@@ -279,3 +279,9 @@ a:hover{color:var(--star)}
 .nextev .eb{font-size:11px;color:var(--gold);letter-spacing:.08em}
 .nextev b a{color:var(--star)}
 .nextev p{margin:0;font-size:13px;color:var(--dim)}
+
+.upd{font-size:12px;color:var(--dim);margin:4px 0 0}
+.stay .stayb{justify-content:flex-start;margin:12px 0 8px}
+.stay .shopbtn{text-decoration:none;color:var(--sky);background:var(--gold);border-radius:999px;padding:8px 16px;font-size:13.5px}
+.stay .shopbtn:hover{color:var(--sky);opacity:.88}
+.stay .shopbtn.alt{background:transparent;color:var(--gold)!important;box-shadow:inset 0 0 0 1px var(--gold)}

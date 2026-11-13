@@ -334,6 +334,24 @@ write("/pref/", head({
   url: "/pref/", jsonld: [crumbsLD([["都道府県の星空", "/pref/"]])]
 }) + topbar() + crumbs([["都道府県の星空"]]) + `<section class="intro"><h1>都道府県別 今夜の星空予報</h1><p>各都道府県の代表地点で、今夜星が見えそうな時間帯をまとめています。地名をクリックすると、30分ごとの見え具合と見える星座の星図が見られます。</p>${prefIndexBody}</section>` + footer() + tail({ place: TOKYO }), { priority: 0.8, changefreq: "hourly" });
 
+// 宿リンク（楽天トラベル・もしも経由）。観察地の名前を楽天トラベルで検索しやすい語に
+const STAY_KW = { "房総の内陸": "養老渓谷", "宮ヶ瀬・丹沢": "宮ヶ瀬", "清里・本栖湖": "清里", "曽爾高原（奈良）": "曽爾", "大川山": "まんのう", "白山麓": "白山", "大野": "大野市", "佐治": "佐治町" };
+function travelURL(q) { const m = SITE.moshimoTravel; return `https://af.moshimo.com/af/c/click?a_id=${m.a_id}&p_id=${m.p_id}&pc_id=${m.pc_id}&pl_id=${m.pl_id}&url=${encodeURIComponent("https://kw.travel.rakuten.co.jp/keyword/Search.do?charset=utf-8&f_query=" + encodeURIComponent(q))}`; }
+function staySection(P) {
+  if (!SITE.moshimoTravel) return "";
+  const spot = P.mw.replace(/（.*?）/g, ""), kw = STAY_KW[P.mw] || spot.split("・")[0];
+  const m = SITE.moshimoTravel;
+  return `
+  <section class="intro stay">
+    <h2>${esc(spot)}の近くに泊まって星を見る</h2>
+    <p>星がいちばん多く見えるのは、月明かりがなく、街明かりから離れた場所の夜中から明け方にかけてです。観察地の近くに泊まれば、帰りの運転を気にせず、空がいちばん暗くなる時間までゆっくり星空を楽しめます。泊まる日は、上の予報で雲と月の条件がよい夜を選ぶのがおすすめです。</p>
+    <div class="shopbtns stayb"><a class="shopbtn" href="${travelURL(kw)}" target="_blank" rel="sponsored nofollow noopener" referrerpolicy="no-referrer-when-downgrade">${esc(kw)}周辺の宿を探す</a><a class="shopbtn alt" href="${travelURL(P.full + " 星空")}" target="_blank" rel="sponsored nofollow noopener" referrerpolicy="no-referrer-when-downgrade">${P.full}の「星空」で探す</a></div>
+    <img src="https://i.moshimo.com/af/i/impression?a_id=${m.a_id}&p_id=${m.p_id}&pc_id=${m.pc_id}&pl_id=${m.pl_id}" width="1" height="1" alt="" loading="lazy" style="border:none;position:absolute">
+    <p class="fine">※楽天トラベルの検索結果へのリンクです（アフィリエイト広告を含みます）。</p>
+  </section>`;
+}
+const UPD = WEATHER && WEATHER.updated ? (() => { const d = new Date(Date.parse(WEATHER.updated) + 9 * 3600e3); return { iso: WEATHER.updated, txt: `${d.getUTCMonth() + 1}月${d.getUTCDate()}日 ${d.getUTCHours()}:${String(d.getUTCMinutes()).padStart(2, "0")}` }; })() : null;
+
 PLACES.forEach((P, pi) => {
   const S = core.summary(pi, 0, WEATHER);
   const seasonal = CONS.filter(C => !C.mw && C.lv <= 2).map(C => ({ C, b: core.bestFor(C, S.slots, P) })).filter(o => o.b && o.b.alt >= 30).sort((a, b) => b.b.alt - a.b.alt).slice(0, 8);
@@ -343,14 +361,18 @@ PLACES.forEach((P, pi) => {
   const nevHTML = nev ? (() => { const x = new Date(nev.t), dd = Math.round((nev.t - today) / core.DAY); const w = evWindow(nev, pi, dd); return `<div class="nextev"><span class="eb">次の流星群</span><b><a href="/event/${nev.slug}/">${nev.n}</a>　${x.getUTCMonth() + 1}月${x.getUTCDate()}日(${core.WD[x.getUTCDay()]})の夜</b><p>${P.full}での見頃：${w === "条件が悪い" ? "この夜は条件が悪そうです" : w}　${nev.rate}</p></div>`; })() : "";
   write(`/pref/${P.slug}/`, head({
     title: `${P.full}の今日の星空予報｜星空指数・星が見える時間と見える星座 - ${SITE.name}`,
-    desc, url: `/pref/${P.slug}/`, jsonld: [crumbsLD([["都道府県の星空", "/pref/"], [P.full + "の星空", null]])]
+    desc, url: `/pref/${P.slug}/`, jsonld: [crumbsLD([["都道府県の星空", "/pref/"], [P.full + "の星空", null]]), { "@context": "https://schema.org", "@type": "WebPage", name: `${P.full}の今日の星空予報`, url: `${SITE.url}/pref/${P.slug}/`, ...(UPD ? { dateModified: UPD.iso } : {}) }]
   }) + topbar() + crumbs([["都道府県の星空", "/pref/"], [P.full]]) + `
-  <section class="intro top-intro"><h1>${P.full}の今日の星空予報</h1>${nevHTML}</section>
+  <section class="intro top-intro"><h1>${P.full}の今日の星空予報</h1>${UPD ? `<p class="upd">予報の更新：<time datetime="${UPD.iso}">${UPD.txt}</time>　雲の予報は3時間ごとに自動で更新しています</p>` : ""}${nevHTML}</section>
 ` + appHTML({ pi }) + `
   <section class="intro">
     <h2>${P.full}で星を見るなら</h2>
     <p>${P.full}の代表地点（${P.c}）の空の明るさは、9段階の「ボートル・スケール」で${P.b}ほどです。${easyTxt}。天の川を見たいときは、${esc(P.mw)}のような街明かりの少ない場所まで出かけるのがおすすめです。</p>
     ${seasonal.length ? `<p>今夜${P.full}で見やすい主な星座：${seasonal.map(o => `<a href="/seiza/${o.C.slug}/">${o.C.short}</a>（${core.nx(o.b.t)}${core.fmt(o.b.t)}ごろ・${core.dir(o.b.az)}の空）`).join("、")}</p>` : ""}
+  </section>${staySection(P)}
+  <section class="intro">
+    <h2>この予報のしくみ</h2>
+    <p>${P.full}の予報は、代表地点（${P.c}）の雲の予報（MET Norway）に、日の入り後に空が十分暗くなる時刻（天文薄明）、月の明るさと高さ、街明かりによる空の明るさを組み合わせて、30分ごとに星の見えやすさを計算しています。星空指数は、その夜いちばん条件のよい時間帯の見えやすさを100点満点で表したものです。雲の予報は3時間ごとに更新され、そのたびにこのページの予報も新しくなります。</p>
   </section>
 ` + footer() + tail({ place: pi }), { priority: 0.9, changefreq: "hourly" });
 });
@@ -511,7 +533,7 @@ plain("/about/", "運営者情報", "運営者情報", `
 <h2>このサイトについて</h2>
 <p>${SITE.name}は、「今夜、星はいつ見えるのか」に答えるための星空情報サイトです。雲の予報、日の入り後の空の暗さ、月明かりを組み合わせて、星が見える時間帯を30分ごとに予報しています。あわせて、今夜見える星座の星図、88星座の見つけ方と神話、流星群の見頃の時間と方角を紹介しています。</p>
 <h2>データについて</h2>
-<p>雲の予報は、ノルウェー気象局（MET Norway）が公開している予報データ（CC BY 4.0）を加工して使っています。日の入り・薄明・月の満ち欠けと位置・星座の位置は、公開されている天文計算式をもとに当サイトで計算しています。予報は外れることがあり、また計算には数分程度の誤差があります。</p>
+<p>雲の予報は、ノルウェー気象局（MET Norway）が公開している予報データ（CC BY 4.0）を加工して使っています。日の入り・薄明・月の満ち欠けと位置・星座の位置は、公開されている天文計算式をもとに当サイトで計算しています。雲の予報は3時間ごとに自動で取り込み、そのたびに全国47都道府県の予報ページを作り直しています。予報は外れることがあり、また計算には数分程度の誤差があります。</p>
 <h2>運営者について</h2>
 <p>${SITE.name}は、YouTubeチャンネル「宇宙と謎のずんだ研究所」が運営しています。チャンネルでは、宇宙・天文・地球科学の話題や、世界のふしぎを科学で検証する解説動画を毎日公開しています。動画を見て「実際に星を見てみたい」と思った人が、すぐに今夜の空を確かめられる場所がほしいと考え、このサイトを作りました。</p>
 <h2>記事の作り方</h2>
