@@ -246,22 +246,10 @@ ${targetFirst ? "" : target}
   </section>
 
 ${giftCard()}
-  <section class="yt" id="ytbox" aria-label="YouTubeチャンネル">
-    <div class="thumb"><span>宇宙と謎のずんだ研究所</span></div>
-    <div class="body">
-      <span class="eb">YOUTUBE・宇宙と謎のずんだ研究所</span>
-      <h3>宇宙・サイエンス・世界の謎の解説動画</h3>
-      <p>宇宙・サイエンス・世界の謎をわかりやすく解説しています。星や宇宙が好きな人はチャンネル登録してね。</p>
-      <div class="btns"><a class="ytsub" href="${SITE.youtube}?sub_confirmation=1" target="_blank" rel="noopener">チャンネル登録</a><a class="ytwatch" href="${SITE.youtube}/videos" target="_blank" rel="noopener">動画を見る</a></div>
-    </div>
-  </section>
-
   <section class="notify" aria-label="お知らせの受け取り方">
-    <div><h2>見逃さないために</h2><p class="sub">どれも無料。登録やアプリのインストールはいりません。</p></div>
+    <div><h2>見逃さないために</h2><p class="sub">無料。登録やアプリのインストールはいりません。</p></div>
     <div class="ways">
       <div><b>イベントをカレンダーに入れる</b><small>上の「これからの天体イベント」の「カレンダーに追加」から。前日にスマホのカレンダーが知らせてくれます。</small></div>
-      <div><b>X（旧Twitter）をフォロー</b><small>イベントの当日に「今夜の見頃」をお知らせします。<a class="xlink" href="${SITE.x}" target="_blank" rel="noopener">@zundamon_space</a></small></div>
-      <div><b>YouTubeでチャンネル登録</b><small>流星群の前日には、見頃の時間と方角をまとめた短い動画を出します。新しい長い動画もベルの通知で届きます。</small></div>
     </div>
   </section>`;
 }
@@ -337,8 +325,9 @@ write("/pref/", head({
 // 宿リンク（楽天トラベル・もしも経由）。観察地の名前を楽天トラベルで検索しやすい語に
 const STAY_KW = { "房総の内陸": "養老渓谷", "宮ヶ瀬・丹沢": "宮ヶ瀬", "清里・本栖湖": "清里", "曽爾高原（奈良）": "曽爾", "大川山": "まんのう", "白山麓": "白山", "大野": "大野市", "佐治": "佐治町" };
 function travelURL(q) { const m = SITE.moshimoTravel; return `https://af.moshimo.com/af/c/click?a_id=${m.a_id}&p_id=${m.p_id}&pc_id=${m.pc_id}&pl_id=${m.pl_id}&url=${encodeURIComponent("https://kw.travel.rakuten.co.jp/keyword/Search.do?charset=utf-8&f_query=" + encodeURIComponent(q))}`; }
+const STAY_TRIAL = new Set(["hokkaido", "nagano", "okayama", "fukuoka", "kumamoto", "okinawa"]); // 宿リンクの試験掲載県
 function staySection(P) {
-  if (!SITE.moshimoTravel) return "";
+  if (!SITE.moshimoTravel || !STAY_TRIAL.has(P.slug)) return "";
   const spot = P.mw.replace(/（.*?）/g, ""), kw = STAY_KW[P.mw] || spot.split("・")[0];
   const m = SITE.moshimoTravel;
   return `
