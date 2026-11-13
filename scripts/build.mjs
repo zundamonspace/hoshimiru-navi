@@ -11,7 +11,7 @@ const OUT = path.join(ROOT, "dist");
 const core = require(path.join(SRC, "assets", "core.js"));
 import G1 from "./guides1.mjs";
 import G2 from "./guides2.mjs";
-import { SEIZA_EXTRA, EVENT_EXTRA } from "./extra.mjs";
+import { SEIZA_EXTRA, EVENT_EXTRA, EVENT_YEAR_EXTRA } from "./extra.mjs";
 const GUIDES = [...G1, ...G2];
 const GUIDE_DATE = "2026年10月26日";
 const { PLACES, CONS, FIG, FAMOUS, MYTH, SITE, REGIONS, esc } = core;
@@ -420,18 +420,19 @@ allEv.forEach(e => {
   const x = new Date(e.t), date = `${x.getUTCFullYear()}年${x.getUTCMonth() + 1}月${x.getUTCDate()}日(${core.WD[x.getUTCDay()]})`;
   const dd = Math.round((e.t - today) / core.DAY), f = core.illum(e.t + 16 * 3600e3).f;
   const rows = PLACES.map((P, pi) => `<tr><td><a href="/pref/${P.slug}/">${P.full}</a></td><td>${evWindow(e, pi, dd)}</td></tr>`).join("");
-  const C = CONS.find(c => c.n === e.c);
+  const C = CONS.find(c => c.n === e.c), YX = e.t >= today - core.DAY ? EVENT_YEAR_EXTRA[e.slug] : null;
   write(`/event/${e.slug}/`, head({
     title: `${e.n} ${e.y}の見頃はいつ？時間・方角・月明かり｜${SITE.name}`,
     desc: `${e.n}の極大は${date}。${e.rate}。都道府県ごとの見頃の時間、流れ星が飛んでくる方向、月明かりの条件をまとめています。`,
     url: `/event/${e.slug}/`,
-    jsonld: [crumbsLD([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`, null]])]
+    jsonld: [crumbsLD([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`, null]]), ...(YX && YX.faq ? [{ "@context": "https://schema.org", "@type": "FAQPage", mainEntity: YX.faq.map(([q, a]) => ({ "@type": "Question", name: q, acceptedAnswer: { "@type": "Answer", text: a } })) }] : [])]
   }) + topbar() + crumbs([["流星群カレンダー", "/event/"], [`${e.n} ${e.y}`]]) + `
   <section class="intro top-intro"><h1>${e.n} ${e.y}の見頃</h1>${e.t < today - core.DAY ? (() => { const nx = allEv.find(z => z.k === e.k && z.t >= today); const nd = nx && new Date(nx.t); return `<div class="nextev"><span class="eb">この流星群は終わりました</span><b>${nx ? `次回は<a href="/event/${nx.slug}/">${nd.getUTCFullYear()}年${nd.getUTCMonth() + 1}月${nd.getUTCDate()}日の夜</a>です` : "次回の日程は流星群カレンダーで確認できます"}</b><p>今後の流星群は<a href="/event/">流星群カレンダー</a>にまとめています。</p></div>`; })() : ""}
     <dl class="evfacts"><dt>極大</dt><dd>${date}の夜</dd><dt>流れる数</dt><dd>${e.rate}</dd><dt>放射点</dt><dd><a href="/seiza/${C ? C.slug : ""}/">${e.c}</a>の方向</dd><dt>月明かり</dt><dd>${f < .3 ? "少なめで好条件" : f < .65 ? "やや邪魔" : "強め"}（月の輝き${Math.round(f * 100)}%）</dd></dl>
     <p>${e.tip}${/空全体/.test(e.tip)?"":"流れ星は放射点を中心に四方へ飛ぶので、放射点だけを見つめるより、空を広く見渡すのがコツです。"}目が暗さに慣れるまで15分ほどかかるので、スマホの画面はできるだけ見ないようにしましょう。</p>
   </section>
-` + appHTML({ pi: TOKYO }) + `
+` + (YX ? `  <section class="intro extra">${YX.html}${YX.faq ? `<h3>よくある質問</h3><dl class="faq">${YX.faq.map(([q, a]) => `<dt>${q}</dt><dd>${a}</dd>`).join("")}</dl>` : ""}</section>
+` : "") + appHTML({ pi: TOKYO }) + `
 ${EVENT_EXTRA[e.k] ? `  <section class="intro extra">${EVENT_EXTRA[e.k]}<p>見るときのコツは<a href="/guide/meteor/">流星群をたくさん見るコツ</a>で詳しく紹介しています。</p></section>` : ""}
   <section class="intro">
     <h2>都道府県ごとの見頃の時間</h2>

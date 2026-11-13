@@ -285,3 +285,6 @@ a:hover{color:var(--star)}
 .stay .shopbtn{text-decoration:none;color:var(--sky);background:var(--gold);border-radius:999px;padding:8px 16px;font-size:13.5px}
 .stay .shopbtn:hover{color:var(--sky);opacity:.88}
 .stay .shopbtn.alt{background:transparent;color:var(--gold)!important;box-shadow:inset 0 0 0 1px var(--gold)}
+.faq dt{font-weight:600;margin-top:12px}
+.faq dd{margin:4px 0 0;color:var(--dim)}
+.extra h3{font-size:16px;margin:20px 0 6px}
