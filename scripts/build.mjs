@@ -44,7 +44,6 @@ ${noindex ? '<meta name="robots" content="noindex">' : ""}
 <meta property="og:url" content="${SITE.url}${url}">
 <meta property="og:image" content="${SITE.url}/og.png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:site" content="@zundamon_space">
 <meta name="theme-color" content="#0b1424">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -87,7 +86,7 @@ function footer() {
   return `  <footer class="foot">
     <section class="links"><h2>都道府県の星空</h2><div class="linkgrid">${regions}</div></section>
     <section class="links"><h2>主な星座</h2><div class="linkgrid">${seasons}</div><p><a href="/seiza/">88星座の一覧を見る →</a>　<a href="/event/">流星群カレンダー →</a>　<a href="/guide/">星空観察ガイド →</a>　<a href="/gift/">宇宙好きの子へのプレゼント →</a></p></section>
-    <nav class="footnav"><a href="/about/">運営者情報</a><a href="/privacy/">プライバシーポリシー</a><a href="/contact/">お問い合わせ</a><a href="${SITE.youtube}" target="_blank" rel="noopener">YouTube</a><a href="${SITE.x}" target="_blank" rel="noopener">X</a></nav>
+    <nav class="footnav"><a href="/about/">運営者情報</a><a href="/privacy/">プライバシーポリシー</a><a href="/contact/">お問い合わせ</a><a href="${SITE.youtube}" target="_blank" rel="noopener">YouTube</a></nav>
     <p class="fine">※当サイトはアフィリエイト広告を利用しています。<br>雲の予報：<a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>（CC BY 4.0）のデータをもとに加工。日の入り・薄明・月・星座の位置は当サイトで計算しています。予報は外れることがあります。<br>© ${Y} ${SITE.name}</p>
   </footer>`;
 }
@@ -518,7 +517,7 @@ function plain(url, title, h1, body) {
 </body></html>`, { priority: 0.3, changefreq: "monthly" });
 }
 plain("/about/", "運営者情報", "運営者情報", `
-<dl class="evfacts"><dt>サイト名</dt><dd>${SITE.name}</dd><dt>URL</dt><dd>${SITE.url}</dd><dt>運営</dt><dd>宇宙と謎のずんだ研究所</dd><dt>YouTube</dt><dd><a href="${SITE.youtube}" target="_blank" rel="noopener">宇宙と謎のずんだ研究所</a></dd><dt>X</dt><dd><a href="${SITE.x}" target="_blank" rel="noopener">@zundamon_space</a></dd><dt>お問い合わせ</dt><dd><a href="/contact/">お問い合わせページ</a></dd></dl>
+<dl class="evfacts"><dt>サイト名</dt><dd>${SITE.name}</dd><dt>URL</dt><dd>${SITE.url}</dd><dt>運営</dt><dd>宇宙と謎のずんだ研究所</dd><dt>YouTube</dt><dd><a href="${SITE.youtube}" target="_blank" rel="noopener">宇宙と謎のずんだ研究所</a></dd><dt>お問い合わせ</dt><dd><a href="/contact/">お問い合わせページ</a></dd></dl>
 <h2>このサイトについて</h2>
 <p>${SITE.name}は、「今夜、星はいつ見えるのか」に答えるための星空情報サイトです。雲の予報、日の入り後の空の暗さ、月明かりを組み合わせて、星が見える時間帯を30分ごとに予報しています。あわせて、今夜見える星座の星図、88星座の見つけ方と神話、流星群の見頃の時間と方角を紹介しています。</p>
 <h2>データについて</h2>
