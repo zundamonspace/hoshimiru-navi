@@ -86,7 +86,7 @@ function footer() {
   return `  <footer class="foot">
     <section class="links"><h2>都道府県の星空</h2><div class="linkgrid">${regions}</div></section>
     <section class="links"><h2>主な星座</h2><div class="linkgrid">${seasons}</div><p><a href="/seiza/">88星座の一覧を見る →</a>　<a href="/event/">流星群カレンダー →</a>　<a href="/guide/">星空観察ガイド →</a>　<a href="/gift/">宇宙好きの子へのプレゼント →</a></p></section>
-    <nav class="footnav"><a href="/about/">運営者情報</a><a href="/privacy/">プライバシーポリシー</a><a href="/contact/">お問い合わせ</a><a href="${SITE.youtube}" target="_blank" rel="noopener">YouTube</a></nav>
+    <nav class="footnav"><a href="/about/">運営者情報</a><a href="/privacy/">プライバシーポリシー</a><a href="/contact/">お問い合わせ</a></nav>
     <p class="fine">※当サイトはアフィリエイト広告を利用しています。<br>雲の予報：<a href="https://api.met.no/" target="_blank" rel="noopener">MET Norway</a>（CC BY 4.0）のデータをもとに加工。日の入り・薄明・月・星座の位置は当サイトで計算しています。予報は外れることがあります。<br>© ${Y} ${SITE.name}</p>
   </footer>`;
 }
@@ -452,11 +452,11 @@ GUIDES.forEach(g => {
   const rel = (g.related || []).map(k => GUIDES.find(x => x.slug === k)).filter(Boolean);
   write(`/guide/${g.slug}/`, head({
     title: `${g.title}｜${SITE.name}`, desc: g.desc, url: `/guide/${g.slug}/`,
-    jsonld: [crumbsLD([["星空観察ガイド", "/guide/"], [g.h1, null]]), { "@context": "https://schema.org", "@type": "Article", headline: g.h1, description: g.desc, datePublished: "2026-10-26", dateModified: "2026-10-26", author: { "@type": "Organization", name: "宇宙と謎のずんだ研究所", url: SITE.youtube }, publisher: { "@type": "Organization", name: SITE.name, url: SITE.url } }]
+    jsonld: [crumbsLD([["星空観察ガイド", "/guide/"], [g.h1, null]]), { "@context": "https://schema.org", "@type": "Article", headline: g.h1, description: g.desc, datePublished: "2026-10-26", dateModified: "2026-10-26", author: { "@type": "Person", name: `${SITE.name} 運営者`, url: SITE.url + "/about/" }, publisher: { "@type": "Organization", name: SITE.name, url: SITE.url } }]
   }) + topbar() + crumbs([["星空観察ガイド", "/guide/"], [g.h1]]) + `
   <article class="doc guide">
     <h1>${g.h1}</h1>
-    <p class="meta">${GUIDE_DATE}更新　文：<a href="/about/">${SITE.name}編集部</a></p>
+    <p class="meta">${GUIDE_DATE}更新　文：<a href="/about/">${SITE.name}（個人運営）</a></p>
     <p class="lead">${g.lead}</p>
     ${g.body}
     <aside class="cta"><b>今夜、星は見える？</b><p>雲・空の暗さ・月明かりから、星が見える時間を30分ごとに予報しています。</p><a class="btnlink" href="/">今夜の星空予報を見る</a></aside>
@@ -518,13 +518,13 @@ function plain(url, title, h1, body) {
 </body></html>`, { priority: 0.3, changefreq: "monthly" });
 }
 plain("/about/", "運営者情報", "運営者情報", `
-<dl class="evfacts"><dt>サイト名</dt><dd>${SITE.name}</dd><dt>URL</dt><dd>${SITE.url}</dd><dt>運営</dt><dd>宇宙と謎のずんだ研究所</dd><dt>YouTube</dt><dd><a href="${SITE.youtube}" target="_blank" rel="noopener">宇宙と謎のずんだ研究所</a></dd><dt>お問い合わせ</dt><dd><a href="/contact/">お問い合わせページ</a></dd></dl>
+<dl class="evfacts"><dt>サイト名</dt><dd>${SITE.name}</dd><dt>URL</dt><dd>${SITE.url}</dd><dt>運営</dt><dd>${SITE.name}（個人運営）</dd><dt>お問い合わせ</dt><dd><a href="https://docs.google.com/forms/d/e/1FAIpQLSeZHrX0iSiCY8pR-OayCDWHadv7Zx7lC0Hdc2aHDNGcq4nycg/viewform" target="_blank" rel="noopener">お問い合わせフォーム</a></dd></dl>
 <h2>このサイトについて</h2>
 <p>${SITE.name}は、「今夜、星はいつ見えるのか」に答えるための星空情報サイトです。雲の予報、日の入り後の空の暗さ、月明かりを組み合わせて、星が見える時間帯を30分ごとに予報しています。あわせて、今夜見える星座の星図、88星座の見つけ方と神話、流星群の見頃の時間と方角を紹介しています。</p>
 <h2>データについて</h2>
 <p>雲の予報は、ノルウェー気象局（MET Norway）が公開している予報データ（CC BY 4.0）を加工して使っています。日の入り・薄明・月の満ち欠けと位置・星座の位置は、公開されている天文計算式をもとに当サイトで計算しています。雲の予報は3時間ごとに自動で取り込み、そのたびに全国47都道府県の予報ページを作り直しています。予報は外れることがあり、また計算には数分程度の誤差があります。</p>
 <h2>運営者について</h2>
-<p>${SITE.name}は、YouTubeチャンネル「宇宙と謎のずんだ研究所」が運営しています。チャンネルでは、宇宙・天文・地球科学の話題や、世界のふしぎを科学で検証する解説動画を毎日公開しています。動画を見て「実際に星を見てみたい」と思った人が、すぐに今夜の空を確かめられる場所がほしいと考え、このサイトを作りました。</p>
+<p>${SITE.name}は、星空観察と宇宙が好きな個人が運営しているサイトです。「今夜、星は見えるのか」「流れ星は何時ごろ見ればいいのか」を、天気予報と同じくらい手軽に確かめられる場所がほしいと考えて作りました。予報の計算からページの文章まで、ひとりで作って更新しています。ご意見やご指摘は<a href="/contact/">お問い合わせフォーム</a>からお送りください。</p>
 <h2>記事の作り方</h2>
 <p><a href="/guide/">星空観察ガイド</a>や星座・流星群の解説は、国立天文台やNASAなどの公的機関・研究機関が公開している情報や、天文学の一般的な知見をもとに、はじめての人にもわかりやすい言葉で書いています。数値（距離・明るさ・温度など）には観測や研究によって幅があるものもあるため、「約」「ほど」などの表現を使っています。内容に誤りを見つけた場合は、<a href="/contact/">お問い合わせ</a>からお知らせください。確認のうえ修正します。</p>
 <h2>広告について</h2>
