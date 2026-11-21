@@ -11,8 +11,9 @@ const OUT = path.join(ROOT, "dist");
 const core = require(path.join(SRC, "assets", "core.js"));
 import G1 from "./guides1.mjs";
 import G2 from "./guides2.mjs";
+import G3 from "./guides3.mjs";
 import { SEIZA_EXTRA, EVENT_EXTRA, EVENT_YEAR_EXTRA } from "./extra.mjs";
-const GUIDES = [...G1, ...G2];
+const GUIDES = [...G1, ...G2, ...G3];
 const GUIDE_DATE = "2026年10月26日";
 const { PLACES, CONS, FIG, FAMOUS, MYTH, SITE, REGIONS, esc } = core;
 
@@ -452,11 +453,11 @@ GUIDES.forEach(g => {
   const rel = (g.related || []).map(k => GUIDES.find(x => x.slug === k)).filter(Boolean);
   write(`/guide/${g.slug}/`, head({
     title: `${g.title}｜${SITE.name}`, desc: g.desc, url: `/guide/${g.slug}/`,
-    jsonld: [crumbsLD([["星空観察ガイド", "/guide/"], [g.h1, null]]), { "@context": "https://schema.org", "@type": "Article", headline: g.h1, description: g.desc, datePublished: "2026-10-26", dateModified: "2026-10-26", author: { "@type": "Person", name: `${SITE.name} 運営者`, url: SITE.url + "/about/" }, publisher: { "@type": "Organization", name: SITE.name, url: SITE.url } }]
+    jsonld: [crumbsLD([["星空観察ガイド", "/guide/"], [g.h1, null]]), { "@context": "https://schema.org", "@type": "Article", headline: g.h1, description: g.desc, datePublished: g.iso || "2026-10-26", dateModified: g.iso || "2026-10-26", author: { "@type": "Person", name: `${SITE.name} 運営者`, url: SITE.url + "/about/" }, publisher: { "@type": "Organization", name: SITE.name, url: SITE.url } }]
   }) + topbar() + crumbs([["星空観察ガイド", "/guide/"], [g.h1]]) + `
   <article class="doc guide">
     <h1>${g.h1}</h1>
-    <p class="meta">${GUIDE_DATE}更新　文：<a href="/about/">${SITE.name}（個人運営）</a></p>
+    <p class="meta">${g.date || GUIDE_DATE}更新　文：<a href="/about/">${SITE.name}（個人運営）</a></p>
     <p class="lead">${g.lead}</p>
     ${g.body}
     <aside class="cta"><b>今夜、星は見える？</b><p>雲・空の暗さ・月明かりから、星が見える時間を30分ごとに予報しています。</p><a class="btnlink" href="/">今夜の星空予報を見る</a></aside>
