@@ -378,6 +378,7 @@ ${SEASONS.map(s => `<h2>${s}</h2><ul class="cards">${CONS.filter(C => C.season =
 
 // 星座の漢字表記（「射手座 いつ見える」などで検索されるため）
 const KANJI = { "おひつじ座": "牡羊座", "おうし座": "牡牛座", "ふたご座": "双子座", "かに座": "蟹座", "しし座": "獅子座", "おとめ座": "乙女座", "てんびん座": "天秤座", "さそり座": "蠍座", "いて座": "射手座", "やぎ座": "山羊座", "みずがめ座": "水瓶座", "うお座": "魚座", "はくちょう座": "白鳥座", "こと座": "琴座", "わし座": "鷲座", "おおぐま座": "大熊座", "こぐま座": "小熊座", "くじら座": "鯨座", "おおいぬ座": "大犬座", "こいぬ座": "小犬座", "カシオペヤ座": "カシオペア座", "かんむり座": "冠座", "へびつかい座": "蛇遣座", "うしかい座": "牛飼座", "ぎょしゃ座": "馭者座" };
+const TITLE_V2 = new Set(["orion", "taurus", "leo", "cassiopeia"]);
 CONS.forEach(C => {
   const P = PLACES[TOKYO], bm = core.bestMonths(C, P), months = core.monthRange(bm), fam = core.famousOf(C);
   const maxAlt = 90 - Math.abs(P.lat - C.de);
@@ -386,8 +387,11 @@ CONS.forEach(C => {
   const circ = C.de > 90 - P.lat;
   const dir = C.de > P.lat ? (circ ? "北の空" : "北の空の高いところ") : maxAlt >= 75 ? "頭の真上近く" : maxAlt < 30 ? "南の低い空" : "南の空";
   const invisible = maxAlt <= 2;
+  // タイトル改善の試験（2026-11-21〜、SEO_LOG.md に記録。他の星座ページは比較用にそのまま）
+  const v2 = TITLE_V2.has(C.slug) && !C.mw && !invisible;
   const title = C.mw ? `天の川はいつ見える？見える時期・時間・場所｜${SITE.name}`
     : invisible ? `${C.short}は日本から見える？見える場所と時期｜${SITE.name}`
+    : v2 ? (circ ? `${C.short}${alias}はいつ見える？一年中・${dir}｜今夜の方角と見つけ方` : `${C.short}${alias}はいつ見える？${months}の夜・${dir}｜今夜見える時刻と方角`)
     : `${C.short}${alias}はいつ見える？見える時期・時間・方角｜${SITE.name}`;
   const h1 = C.mw ? "天の川はいつ見える？見える時期と場所" : invisible ? `${C.short}は日本から見える？` : `${C.short}${alias}はいつ見える？`;
   const shift = bm.length && bm.length < 12 ? `見頃より前の月は夜おそく、後の月は夕方の早い時間に見えます。` : "";
@@ -397,6 +401,7 @@ CONS.forEach(C => {
     : `<b>${C.short}${alias}がよく見えるのは${months ? `${months}ごろ` : ""}の夜9時ごろ、${dir}です。</b>${shift}${C.star ? `目印は${esc(C.star)}。` : ""}${esc(C.note)}。`;
   const plainLead = lead.replace(/<[^>]+>/g, "");
   const desc = invisible ? `${plainLead}`.slice(0, 160)
+    : v2 ? `${C.short}${alias}は${circ ? `一年中見える星座で、特に${months}ごろの夜9時に${dir}の高いところ` : `${C.season.replace("の星座", "")}の星座。${months}ごろの夜9時に${dir}`}に見えます。今夜あなたの場所で何時にどの方角に見えるかを表示。見つけ方${fam.length ? `や${fam.slice(0, 2).join("・")}など有名な星` : ""}も紹介します。`.slice(0, 160)
     : `${C.short}${alias}はいつ見える？${circ ? "一年中見える星座で、" : ""}見頃は${months || "—"}の夜9時ごろ、${dir}。今夜あなたの場所で見える時刻と方角、見つけ方${fam.length ? `、${fam.slice(0, 2).join("・")}など有名な星` : ""}、神話を紹介します。`.slice(0, 160);
   write(`/seiza/${C.slug}/`, head({
     title, desc, url: `/seiza/${C.slug}/`,
