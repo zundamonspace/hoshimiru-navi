@@ -378,7 +378,10 @@ ${SEASONS.map(s => `<h2>${s}</h2><ul class="cards">${CONS.filter(C => C.season =
 
 // 星座の漢字表記（「射手座 いつ見える」などで検索されるため）
 const KANJI = { "おひつじ座": "牡羊座", "おうし座": "牡牛座", "ふたご座": "双子座", "かに座": "蟹座", "しし座": "獅子座", "おとめ座": "乙女座", "てんびん座": "天秤座", "さそり座": "蠍座", "いて座": "射手座", "やぎ座": "山羊座", "みずがめ座": "水瓶座", "うお座": "魚座", "はくちょう座": "白鳥座", "こと座": "琴座", "わし座": "鷲座", "おおぐま座": "大熊座", "こぐま座": "小熊座", "くじら座": "鯨座", "おおいぬ座": "大犬座", "こいぬ座": "小犬座", "カシオペヤ座": "カシオペア座", "かんむり座": "冠座", "へびつかい座": "蛇遣座", "うしかい座": "牛飼座", "ぎょしゃ座": "馭者座" };
-const TITLE_V2 = new Set(["orion", "taurus", "leo", "cassiopeia"]);
+const TITLE_V2 = new Set(["orion", "taurus", "leo", "cassiopeia", "scorpius"]);
+// 星占いの12星座の期間（「やぎ座 いつ」などは誕生日の期間を探している人も多いため。2026-11-28〜試験）
+const ZODIAC = { aries: ["牡羊座", "3月21日〜4月19日"], taurus: ["牡牛座", "4月20日〜5月20日"], gemini: ["双子座", "5月21日〜6月21日"], cancer: ["蟹座", "6月22日〜7月22日"], leo: ["獅子座", "7月23日〜8月22日"], virgo: ["乙女座", "8月23日〜9月22日"], libra: ["天秤座", "9月23日〜10月23日"], scorpius: ["蠍座", "10月24日〜11月22日"], sagittarius: ["射手座", "11月23日〜12月21日"], capricornus: ["山羊座", "12月22日〜1月19日"], aquarius: ["水瓶座", "1月20日〜2月18日"], pisces: ["魚座", "2月19日〜3月20日"] };
+const ZODIAC_NOTE = new Set(["capricornus", "aquarius", "gemini"]);
 CONS.forEach(C => {
   const P = PLACES[TOKYO], bm = core.bestMonths(C, P), months = core.monthRange(bm), fam = core.famousOf(C);
   const maxAlt = 90 - Math.abs(P.lat - C.de);
@@ -407,7 +410,7 @@ CONS.forEach(C => {
     title, desc, url: `/seiza/${C.slug}/`,
     jsonld: [crumbsLD([["88星座", "/seiza/"], [C.short, null]])]
   }) + topbar() + crumbs([["88星座", "/seiza/"], [C.short]]) + `
-  <section class="intro top-intro"><h1>${h1}</h1><p>${lead}</p></section>
+  <section class="intro top-intro"><h1>${h1}</h1><p>${lead}</p>${ZODIAC_NOTE.has(C.slug) && ZODIAC[C.slug] ? `<div class="nextev zodiac"><b>星占いの「${ZODIAC[C.slug][0]}」の期間は？</b><br>星占い（誕生日の星座）の${ZODIAC[C.slug][0]}は、<b>${ZODIAC[C.slug][1]}ごろ</b>に生まれた人の星座です（区切りの日は年や占いによって1日ほど前後します）。これは「生まれた日に、太陽がその星座のあたりにあった」という意味なので、誕生日のころは${C.short}が昼の空にあって、夜空では見えません。夜空の${C.short}が見やすいのは、上のとおり${months}ごろの夜です。</div>` : ""}</section>
 ` + appHTML({ pi: TOKYO, targetFirst: true, staticCard: staticCard(C) }) + (SEIZA_EXTRA[C.slug] ? `  <section class="intro extra">${SEIZA_EXTRA[C.slug]}</section>
 ` : "") + footer() + tail({ target: C.n }), { priority: C.lv <= 2 ? 0.8 : 0.6, changefreq: "weekly" });
 });
